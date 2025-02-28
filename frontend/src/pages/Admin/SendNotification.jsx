@@ -15,7 +15,7 @@ const api = axios.create({
 function SendNotification() {
   const [userId, setUserId] = useState("");
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState("sent"); // Default to 'sent' status
+  const [status, setStatus] = useState("Sent"); // Default to 'sent' status
   const [error, setError] = useState("");
 
   const handleUserIdChange = (e) => setUserId(e.target.value);
@@ -68,9 +68,15 @@ function SendNotification() {
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
           {error && <p className="text-red-500 mb-4">{error}</p>}
 
-          <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white/10 backdrop-blur-lg rounded-2xl p-6"
+          >
             <div className="mb-6">
-              <label htmlFor="userId" className="block font-semibold text-white">
+              <label
+                htmlFor="userId"
+                className="block font-semibold text-white"
+              >
                 User ID (Volunteer)
               </label>
               <input
@@ -85,7 +91,10 @@ function SendNotification() {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="message" className="block font-semibold text-white">
+              <label
+                htmlFor="message"
+                className="block font-semibold text-white"
+              >
                 Message
               </label>
               <textarea
@@ -99,7 +108,10 @@ function SendNotification() {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="status" className="block font-semibold text-white">
+              <label
+                htmlFor="status"
+                className="block font-semibold text-white"
+              >
                 Status
               </label>
               <select
@@ -108,8 +120,8 @@ function SendNotification() {
                 onChange={handleStatusChange}
                 className="w-full p-2 border border-gray-300 rounded-lg bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-600 mt-2"
               >
-                <option value="sent">Sent</option>
-                <option value="read">Read</option>
+                <option value="Sent">Sent</option>
+                <option value="Read">Read</option>
               </select>
             </div>
 

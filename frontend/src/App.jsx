@@ -82,7 +82,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/task" element={<TaskManagement />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/volunteer" element={<VolunteerProfile/>} />
+      <Route path="/volunteer" element={<VolunteerProfile />} />
       <Route path="/volunteerlogviewer" element={<VolunteerLogViewer />} />
     </>
   );
@@ -133,9 +133,9 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} /> {/* Use lowercase */}
+              <Route path="/signup" element={<Signup />} />{" "}
+              {/* Use lowercase */}
               <Route path="/forgot-password" element={<ForgotPassword />} />
-
               {/* Conditionally render routes based on userRole */}
               {userRole === "Volunteer" && volunteerRoutes}
               {userRole === "Admin" && adminRoutes}

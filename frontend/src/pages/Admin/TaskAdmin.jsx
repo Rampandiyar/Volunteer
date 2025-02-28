@@ -77,7 +77,10 @@ const AdminTasks = () => {
     try {
       if (currentTask.task_id) {
         // Editing existing task
-        const updatedTask = await updateTaskAPI(currentTask.task_id, currentTask);
+        const updatedTask = await updateTaskAPI(
+          currentTask.task_id,
+          currentTask
+        );
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
             task.task_id === updatedTask.task_id ? updatedTask : task
@@ -137,7 +140,9 @@ const AdminTasks = () => {
       if (result.isConfirmed) {
         try {
           await deleteTaskAPI(id);
-          setTasks((prevTasks) => prevTasks.filter((task) => task.task_id !== id));
+          setTasks((prevTasks) =>
+            prevTasks.filter((task) => task.task_id !== id)
+          );
           Swal.fire("Deleted!", "Your task has been deleted.", "success");
         } catch (error) {
           console.error("Error deleting task:", error);
@@ -197,21 +202,19 @@ const AdminTasks = () => {
           <div className="md:col-span-2 bg-white/10 backdrop-blur-lg rounded-2xl p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex space-x-4">
-                {["All", "Assigned", "In Progress", "Completed"].map(
-                  (status) => (
-                    <button
-                      key={status}
-                      onClick={() => setFilter(status)}
-                      className={`px-4 py-2 rounded-full text-sm transition ${
-                        filter === status
-                          ? "bg-blue-600 text-white"
-                          : "bg-white/10 text-white/70 hover:bg-white/20"
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  )
-                )}
+                {["Pending", "In Progress", "Completed"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFilter(status)}
+                    className={`px-4 py-2 rounded-full text-sm transition ${
+                      filter === status
+                        ? "bg-blue-600 text-white"
+                        : "bg-white/10 text-white/70 hover:bg-white/20"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
               </div>
               <button className="flex items-center text-white/70 hover:text-white">
                 <Filter className="mr-2" size={18} /> Filter
@@ -222,11 +225,15 @@ const AdminTasks = () => {
               {filteredTasks.map((task) => (
                 <div
                   key={task.task_id}
-                  className={`bg-white/10 backdrop-blur-lg rounded-xl p-4 ${requiredSkillsColors[task.required_skills]} cursor-pointer hover:bg-white/20 transition-all`}
+                  className={`bg-white/10 backdrop-blur-lg rounded-xl p-4 ${
+                    requiredSkillsColors[task.required_skills]
+                  } cursor-pointer hover:bg-white/20 transition-all`}
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-semibold text-white">{task.task_name}</h3>
+                      <h3 className="font-semibold text-white">
+                        {task.task_name}
+                      </h3>
                       <p className="text-sm text-indigo-200 truncate">
                         {task.description}
                       </p>
@@ -267,7 +274,9 @@ const AdminTasks = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-600/20 p-4 rounded-xl text-center">
                   <h4 className="text-sm text-blue-200">Total Tasks</h4>
-                  <p className="text-4xl font-bold text-white">{tasks.length}</p>
+                  <p className="text-4xl font-bold text-white">
+                    {tasks.length}
+                  </p>
                 </div>
                 <div className="bg-green-600/20 p-4 rounded-xl text-center">
                   <h4 className="text-sm text-green-200">Completed</h4>
@@ -321,7 +330,10 @@ const AdminTasks = () => {
                 label="Description"
                 value={currentTask.description}
                 onChange={(e) =>
-                  setCurrentTask({ ...currentTask, description: e.target.value })
+                  setCurrentTask({
+                    ...currentTask,
+                    description: e.target.value,
+                  })
                 }
                 fullWidth
                 multiline

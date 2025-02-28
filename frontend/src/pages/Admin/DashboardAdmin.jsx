@@ -19,7 +19,6 @@ import {
   getTopVolunteersByHours,
   getTopVolunteerOfMonth,
   getActivityLogs,
-  getDashboardNotifications,
 } from "../../api";
 
 function AdminDashboard() {
@@ -34,9 +33,11 @@ function AdminDashboard() {
     { name: "Remaining", value: 0 },
   ]);
   const [volunteerHoursData, setVolunteerHoursData] = useState([]);
-  const [topVolunteer, setTopVolunteer] = useState({ name: "No data", hours: 0 });
+  const [topVolunteer, setTopVolunteer] = useState({
+    name: "No data",
+    hours: 0,
+  });
   const [recentActivityLogs, setRecentActivityLogs] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const COLORS = ["#4CAF50", "#FF7043"];
@@ -54,7 +55,11 @@ function AdminDashboard() {
         const taskCompletionResponse = await getTaskCompletionStats();
         setTaskCompletionData([
           { name: "Completed", value: taskCompletionResponse.completed },
-          { name: "Remaining", value: taskCompletionResponse.total - taskCompletionResponse.completed },
+          {
+            name: "Remaining",
+            value:
+              taskCompletionResponse.total - taskCompletionResponse.completed,
+          },
         ]);
 
         // Fetch top volunteers by hours
@@ -68,10 +73,6 @@ function AdminDashboard() {
         // Fetch recent activity logs
         const activityLogsResponse = await getActivityLogs();
         setRecentActivityLogs(activityLogsResponse);
-
-        // Fetch notifications
-        const notificationsResponse = await getDashboardNotifications();
-        setNotifications(notificationsResponse);
 
         setLoading(false);
       } catch (error) {
@@ -117,14 +118,18 @@ function AdminDashboard() {
               <h1 className="text-4xl font-extrabold text-white mb-2">
                 Admin Dashboard
               </h1>
-              <p className="text-indigo-200">Overview of Volunteer Management</p>
+              <p className="text-indigo-200">
+                Overview of Volunteer Management
+              </p>
             </div>
           </header>
 
           {/* Quick Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-white">Total Volunteers</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Total Volunteers
+              </h2>
               <p className="text-3xl font-bold">{stats.totalVolunteers}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
@@ -132,23 +137,31 @@ function AdminDashboard() {
               <p className="text-3xl font-bold">{stats.totalTasks}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Upcoming Events
+              </h2>
               <p className="text-3xl font-bold">{stats.upcomingEvents}</p>
             </div>
           </div>
 
           {/* Top Volunteer Badge */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
-            <h2 className="text-lg font-semibold text-white">Top Volunteer of the Month</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Top Volunteer of the Month
+            </h2>
             <p className="text-3xl font-bold">{topVolunteer.name}</p>
-            <p className="text-sm text-indigo-200">Logged Hours: {topVolunteer.hours}</p>
+            <p className="text-sm text-indigo-200">
+              Logged Hours: {topVolunteer.hours}
+            </p>
           </div>
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             {/* Task Completion Chart */}
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Task Completion Rates</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                Task Completion Rates
+              </h2>
               <PieChart width={300} height={200}>
                 <Pie
                   data={taskCompletionData}
@@ -161,7 +174,10 @@ function AdminDashboard() {
                   label
                 >
                   {taskCompletionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -170,7 +186,9 @@ function AdminDashboard() {
 
             {/* Volunteer Hours Chart */}
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Volunteer Hours Logged</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">
+                Volunteer Hours Logged
+              </h2>
               <BarChart
                 width={400}
                 height={300}
@@ -189,33 +207,14 @@ function AdminDashboard() {
 
           {/* Recent Activity Logs */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
-            <h2 className="text-lg font-semibold text-white mb-4">Recent Activity Logs</h2>
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Recent Activity Logs
+            </h2>
             <ul>
               {recentActivityLogs.map((log) => (
                 <li key={log.id} className="mb-4">
                   <p className="text-sm text-indigo-200">{log.date}</p>
                   <p>{log.activity}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Notifications */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
-            <h2 className="text-lg font-semibold text-white mb-4">Notifications</h2>
-            <ul>
-              {notifications.map((notification) => (
-                <li
-                  key={notification.id}
-                  className={`mb-4 p-4 rounded-xl ${
-                    notification.type === "info"
-                      ? "bg-blue-600/20"
-                      : notification.type === "warning"
-                      ? "bg-yellow-600/20"
-                      : "bg-red-600/20"
-                  }`}
-                >
-                  <p>{notification.message}</p>
                 </li>
               ))}
             </ul>

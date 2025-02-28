@@ -1,11 +1,11 @@
 // src/api.jsx
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = "http://localhost:3000/api";
 
 // Helper function to set headers with authorization token
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,69 +19,77 @@ export const createUser = async (userData) => {
     const response = await axios.post(`${API_BASE_URL}/users/add`, userData);
     return response.data;
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error("Error creating user:", error);
     throw error;
   }
 };
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/users/login`, credentials);
-    localStorage.setItem('token', response.data.token); // Save token to localStorage
+    const response = await axios.post(
+      `${API_BASE_URL}/users/login`,
+      credentials
+    );
+    localStorage.setItem("token", response.data.token); // Save token to localStorage
     return response.data;
   } catch (error) {
-    console.error('Error logging in:', error);
+    console.error("Error logging in:", error);
     throw error;
   }
 };
 
 export const logoutUser = async (userId) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/users/logout`, { userId });
-    localStorage.removeItem('token');
+    const response = await axios.put(`${API_BASE_URL}/users/logout`, {
+      userId,
+    });
+    localStorage.removeItem("token");
     return response.data;
   } catch (error) {
-    console.error('Error logging out:', error);
+    console.error("Error logging out:", error);
     throw error;
   }
 };
 
 export const getAllUsers = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users` );
+    const response = await axios.get(`${API_BASE_URL}/users`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     throw error;
   }
 };
 
 export const getAllcheckins = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users/checkins` );
+    const response = await axios.get(`${API_BASE_URL}/users/checkins`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     throw error;
   }
 };
 
 export const getAllhours = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users/hours` );
+    const response = await axios.get(`${API_BASE_URL}/users/hours`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     throw error;
   }
 };
 
 export const updateUser = async (id, userData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/users/update/${id}`, userData );
+    const response = await axios.put(
+      `${API_BASE_URL}/users/update/${id}`,
+      userData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error("Error updating user:", error);
     throw error;
   }
 };
@@ -91,7 +99,7 @@ export const getUserById = async (id) => {
     const response = await axios.get(`${API_BASE_URL}/users/get/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error("Error fetching user:", error);
     throw error;
   }
 };
@@ -101,7 +109,7 @@ export const deleteUser = async (id) => {
     const response = await axios.delete(`${API_BASE_URL}/users/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting user:', error);
+    console.error("Error deleting user:", error);
     throw error;
   }
 };
@@ -109,63 +117,61 @@ export const deleteUser = async (id) => {
 // Event API
 export const createEvent = async (eventData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/events`, eventData );
+    const response = await axios.post(`${API_BASE_URL}/events`, eventData);
     return response.data;
   } catch (error) {
-    console.error('Error creating event:', error);
+    console.error("Error creating event:", error);
     throw error;
   }
 };
 
 export const getAllEvents = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/events` );
+    const response = await axios.get(`${API_BASE_URL}/events`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching events:', error);
+    console.error("Error fetching events:", error);
     throw error;
   }
 };
 
-
-
 export const updateEvent = async (id, eventData) => {
-    try {
-      const response = await axios.put(`${API_BASE_URL}/events/${id}`, eventData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating event:', error);
-      throw error;
-    }
-  };
+  try {
+    const response = await axios.put(`${API_BASE_URL}/events/${id}`, eventData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating event:", error);
+    throw error;
+  }
+};
 
-  export const deleteEvent = async (id) => {
-    try {
-      const response = await axios.delete(`${API_BASE_URL}/events/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting event:', error);
-      throw error;
-    }
-  };
+export const deleteEvent = async (id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/events/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    throw error;
+  }
+};
 
 // Task API
 export const createTask = async (taskData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/tasks`, taskData );
+    const response = await axios.post(`${API_BASE_URL}/tasks`, taskData);
     return response.data;
   } catch (error) {
-    console.error('Error creating task:', error);
+    console.error("Error creating task:", error);
     throw error;
   }
 };
 
 export const getAllTasks = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/tasks` );
+    const response = await axios.get(`${API_BASE_URL}/tasks`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error("Error fetching tasks:", error);
     throw error;
   }
 };
@@ -175,17 +181,17 @@ export const updateTask = async (id, taskData) => {
     const response = await axios.put(`${API_BASE_URL}/tasks/${id}`, taskData);
     return response.data;
   } catch (error) {
-    console.error('Error updating task:', error);
+    console.error("Error updating task:", error);
     throw error;
   }
 };
 
 export const deleteTask = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/tasks/${id}` );
+    const response = await axios.delete(`${API_BASE_URL}/tasks/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting task:', error);
+    console.error("Error deleting task:", error);
     throw error;
   }
 };
@@ -193,30 +199,36 @@ export const deleteTask = async (id) => {
 // Assignment API
 export const createAssignment = async (assignmentData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/assignments`, assignmentData);
+    const response = await axios.post(
+      `${API_BASE_URL}/assignments`,
+      assignmentData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error creating assignment:', error);
+    console.error("Error creating assignment:", error);
     throw error;
   }
 };
 
 export const updateAssignmentStatus = async (id, statusData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/assignments/${id}`, statusData);
+    const response = await axios.put(
+      `${API_BASE_URL}/assignments/${id}`,
+      statusData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating assignment status:', error);
+    console.error("Error updating assignment status:", error);
     throw error;
   }
 };
 
 export const deleteAssignment = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/assignments/${id}` );
+    const response = await axios.delete(`${API_BASE_URL}/assignments/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting assignment:', error);
+    console.error("Error deleting assignment:", error);
     throw error;
   }
 };
@@ -226,7 +238,7 @@ export const getAssignmentById = async (id) => {
     const response = await axios.get(`${API_BASE_URL}/assignments/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching assignment:', error);
+    console.error("Error fetching assignment:", error);
     throw error;
   }
 };
@@ -236,17 +248,21 @@ export const getAssignment = async () => {
     const response = await axios.get(`${API_BASE_URL}/assignments`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching assignment:', error);
+    console.error("Error fetching assignment:", error);
     throw error;
   }
 };
 
 export const sendNotification = async (notificationData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/notifications`, notificationData);
+    const response = await axios.post(
+      `${API_BASE_URL}/notifications`, // Ensure this matches backend
+      notificationData,
+      getAuthHeaders() // Include auth headers correctly
+    );
     return response.data;
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error("Error sending notification:", error.response?.data || error);
     throw error;
   }
 };
@@ -257,27 +273,29 @@ export const getUserNotifications = async (userId) => {
     const response = await axios.get(`${API_BASE_URL}/notifications/${userId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error("Error fetching notifications:", error);
     throw error;
   }
 };
 
 export const markNotificationAsRead = async (notificationId) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/notifications/${notificationId}`, {} );
+    const response = await axios.put(
+      `${API_BASE_URL}/notifications/${notificationId}`,
+      {}
+    );
     return response.data;
   } catch (error) {
-    console.error('Error marking notification as read:', error);
+    console.error("Error marking notification as read:", error);
     throw error;
   }
 };
-
 export const getDashboardStats = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/dashboard/stats`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error("Error fetching dashboard stats:", error);
     throw error;
   }
 };
@@ -287,17 +305,19 @@ export const getTaskCompletionStats = async () => {
     const response = await axios.get(`${API_BASE_URL}/dashboard/tasks`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching task completion stats:', error);
+    console.error("Error fetching task completion stats:", error);
     throw error;
   }
 };
 
 export const getTopVolunteersByHours = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/dashboard/volunteer-hours`);
+    const response = await axios.get(
+      `${API_BASE_URL}/dashboard/volunteer-hours`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching top volunteers by hours:', error);
+    console.error("Error fetching top volunteers by hours:", error);
     throw error;
   }
 };
@@ -307,7 +327,7 @@ export const getTopVolunteerOfMonth = async () => {
     const response = await axios.get(`${API_BASE_URL}/dashboard/top-volunteer`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching top volunteer of the month:', error);
+    console.error("Error fetching top volunteer of the month:", error);
     throw error;
   }
 };
@@ -317,7 +337,7 @@ export const getActivityLogs = async () => {
     const response = await axios.get(`${API_BASE_URL}/dashboard/activity-logs`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching activity logs:', error);
+    console.error("Error fetching activity logs:", error);
     throw error;
   }
 };
@@ -327,7 +347,7 @@ export const getDashboardNotifications = async () => {
     const response = await axios.get(`${API_BASE_URL}/dashboard/notifications`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching dashboard notifications:', error);
+    console.error("Error fetching dashboard notifications:", error);
     throw error;
   }
 };
@@ -337,7 +357,7 @@ export const getVolunteers = async () => {
     const response = await axios.get(`${API_BASE_URL}/volunteer/volunteers`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching volunteers:', error);
+    console.error("Error fetching volunteers:", error);
     throw error;
   }
 };
@@ -345,10 +365,13 @@ export const getVolunteers = async () => {
 // Task API
 export const updateTaskStatus = async (taskId, statusData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/volunteer/tasks/${taskId}`, statusData);
+    const response = await axios.put(
+      `${API_BASE_URL}/volunteer/tasks/${taskId}`,
+      statusData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating task status:', error);
+    console.error("Error updating task status:", error);
     throw error;
   }
 };
@@ -358,27 +381,32 @@ export const createVolunteerProfile = async () => {
     const response = await axios.get(`${API_BASE_URL}/volunteerprofile/`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching volunteers:', error);
+    console.error("Error fetching volunteers:", error);
     throw error;
   }
 };
 
 export const updateVolunteerProfile = async (volunId, statusData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/volunteerprofile/${volunId}`, statusData);
+    const response = await axios.put(
+      `${API_BASE_URL}/volunteerprofile/${volunId}`,
+      statusData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating task status:', error);
+    console.error("Error updating task status:", error);
     throw error;
   }
 };
 
 export const deleteVolunteerProfile = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/volunteerprofile/${id}` );
+    const response = await axios.delete(
+      `${API_BASE_URL}/volunteerprofile/${id}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error deleting assignment:', error);
+    console.error("Error deleting assignment:", error);
     throw error;
   }
 };
@@ -388,7 +416,7 @@ export const listVolunteerProfiles = async () => {
     const response = await axios.get(`${API_BASE_URL}/volunteerprofile/`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching volunteers:', error);
+    console.error("Error fetching volunteers:", error);
     throw error;
   }
 };
@@ -398,40 +426,48 @@ export const getVolunteerProfile = async (id) => {
     const response = await axios.get(`${API_BASE_URL}/volunteerprofile/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching assignment:', error);
+    console.error("Error fetching assignment:", error);
     throw error;
   }
 };
 
-
-export const getAssignedTasks= async (userId) => {
+export const getAssignedTasks = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/dashboard/${userId}/assigned-tasks`, getAuthHeaders());
+    const response = await axios.get(
+      `${API_BASE_URL}/dashboard/${userId}/assigned-tasks`,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching assigned tasks:', error);
+    console.error("Error fetching assigned tasks:", error);
     throw error;
   }
 };
 
 // Get upcoming events for a specific volunteer
-export const getUpcomingEvents= async (userId) => {
+export const getUpcomingEvents = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/dashboard/${userId}/upcoming-events`, getAuthHeaders());
+    const response = await axios.get(
+      `${API_BASE_URL}/dashboard/${userId}/upcoming-events`,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching upcoming events:', error);
+    console.error("Error fetching upcoming events:", error);
     throw error;
   }
 };
 
 // Get task statistics for a specific volunteer
-export const getTaskStatistics= async (userId) => {
+export const getTaskStatistics = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/dashboard/${userId}/task-statistics`, getAuthHeaders());
+    const response = await axios.get(
+      `${API_BASE_URL}/dashboard/${userId}/task-statistics`,
+      getAuthHeaders()
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching task statistics:', error);
+    console.error("Error fetching task statistics:", error);
     throw error;
   }
 };

@@ -1,7 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
-import { UserCircle, CheckCircle2, XCircle, Calendar, Building2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { getVolunteers, updateTaskStatus } from '../../api';
+import { useState, useEffect, useMemo } from "react";
+import {
+  UserCircle,
+  CheckCircle2,
+  XCircle,
+  Calendar,
+  Building2,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { getVolunteers, updateTaskStatus } from "../../api";
 
 const VolunteerManagement = () => {
   const [searchQuery] = useState("");
@@ -21,7 +27,7 @@ const VolunteerManagement = () => {
         const data = await getVolunteers();
         setVolunteers(data);
       } catch (error) {
-        console.error('Failed to fetch volunteers:', error);
+        console.error("Failed to fetch volunteers:", error);
       } finally {
         setLoading(false);
       }
@@ -45,7 +51,10 @@ const VolunteerManagement = () => {
         ? volunteer.department === filterCriteria.department
         : true;
       return (
-        matchesSearch && matchesSkills && matchesAvailability && matchesDepartment
+        matchesSearch &&
+        matchesSkills &&
+        matchesAvailability &&
+        matchesDepartment
       );
     });
   }, [volunteers, searchQuery, filterCriteria]);
@@ -63,16 +72,16 @@ const VolunteerManagement = () => {
   const handleTaskAction = async (status) => {
     try {
       await updateTaskStatus(selectedVolunteer.task_id, { status });
-      setVolunteers(prev => 
-        prev.map(v => 
-          v.user_id === selectedVolunteer.user_id 
-            ? {...v, task: {...v.task, status}} 
+      setVolunteers((prev) =>
+        prev.map((v) =>
+          v.user_id === selectedVolunteer.user_id
+            ? { ...v, task: { ...v.task, status } }
             : v
         )
       );
       closeModal();
     } catch (error) {
-      console.error('Failed to update task status:', error);
+      console.error("Failed to update task status:", error);
     }
   };
 
@@ -93,16 +102,20 @@ const VolunteerManagement = () => {
             <h1 className="text-5xl font-extrabold text-white mb-2">
               Volunteer Management
             </h1>
-            <p className="text-indigo-200 text-lg">Manage your volunteers efficiently</p>
+            <p className="text-indigo-200 text-lg">
+              Manage your volunteers efficiently
+            </p>
           </div>
         </header>
 
         {/* Filters */}
         <div className="mb-8 flex flex-wrap items-start justify-start gap-4">
-          <select 
+          <select
             className="px-4 py-3 border border-gray-300 text-white bg-white/20 rounded-lg focus:ring-2 focus:ring-indigo-500 shadow-md"
             value={filterCriteria.skills}
-            onChange={(e) => setFilterCriteria(prev => ({...prev, skills: e.target.value}))}
+            onChange={(e) =>
+              setFilterCriteria((prev) => ({ ...prev, skills: e.target.value }))
+            }
           >
             <option value="">All Skills</option>
             <option value="Programming">Programming</option>
@@ -110,10 +123,15 @@ const VolunteerManagement = () => {
             <option value="Marketing">Marketing</option>
           </select>
 
-          <select 
+          <select
             className="px-4 py-3 border border-gray-300 text-white bg-white/20 rounded-lg focus:ring-2 focus:ring-indigo-500 shadow-md"
             value={filterCriteria.availability}
-            onChange={(e) => setFilterCriteria(prev => ({...prev, availability: e.target.value}))}
+            onChange={(e) =>
+              setFilterCriteria((prev) => ({
+                ...prev,
+                availability: e.target.value,
+              }))
+            }
           >
             <option value="">All Availability</option>
             <option value="Full-time">Full-time</option>
@@ -126,8 +144,18 @@ const VolunteerManagement = () => {
           <table className="w-full">
             <thead className="bg-white/20 border-b">
               <tr>
-                {["Name", "Year", "Department", "Skills", "Availability", "Actions"].map((header) => (
-                  <th key={header} className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
+                {[
+                  "Name",
+                  "Year",
+                  "Department",
+                  "Skills",
+                  "Availability",
+                  "Actions",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider"
+                  >
                     {header}
                   </th>
                 ))}
@@ -135,14 +163,16 @@ const VolunteerManagement = () => {
             </thead>
             <tbody>
               {filteredVolunteers.map((volunteer) => (
-                <motion.tr 
-                  key={volunteer.user_id} 
+                <motion.tr
+                  key={volunteer.user_id}
                   whileHover={{ scale: 1.02 }}
                   className="hover:bg-white/10 transition-all duration-200 border-b last:border-b-0"
                 >
                   <td className="px-6 py-4 flex items-center">
                     <UserCircle className="mr-4 text-indigo-500" size={28} />
-                    <span className="font-medium text-lg">{volunteer.username}</span>
+                    <span className="font-medium text-lg">
+                      {volunteer.username}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-lg">{volunteer.year}</td>
                   <td className="px-6 py-4">
@@ -154,9 +184,9 @@ const VolunteerManagement = () => {
                   <td className="px-6 py-4">
                     <div className="flex space-x-2">
                       {volunteer.skills && Array.isArray(volunteer.skills) ? (
-                        volunteer.skills.map(skill => (
-                          <span 
-                            key={skill} 
+                        volunteer.skills.map((skill) => (
+                          <span
+                            key={skill}
                             className="bg-indigo-100 text-indigo-800 text-xs px-3 py-2 rounded-full"
                           >
                             {skill}
@@ -173,14 +203,7 @@ const VolunteerManagement = () => {
                       {volunteer.availability}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <button 
-                      onClick={() => openModal(volunteer)}
-                      className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition duration-200"
-                    >
-                      View Task
-                    </button>
-                  </td>
+                  <td className="px-6 py-4"></td>
                 </motion.tr>
               ))}
             </tbody>
@@ -190,13 +213,13 @@ const VolunteerManagement = () => {
         {/* Task Modal */}
         {isModalOpen && selectedVolunteer && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 relative"
             >
-              <button 
-                onClick={closeModal} 
+              <button
+                onClick={closeModal}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               >
                 ✕
@@ -208,13 +231,13 @@ const VolunteerManagement = () => {
                 {selectedVolunteer.task_description}
               </p>
               <div className="flex space-x-6">
-                <button 
+                <button
                   onClick={() => handleTaskAction("Completed")}
                   className="bg-green-500 text-white px-5 py-3 rounded-lg hover:bg-green-600 transition duration-200"
                 >
                   <CheckCircle2 className="mr-2" size={22} /> Complete Task
                 </button>
-                <button 
+                <button
                   onClick={() => handleTaskAction("Cancelled")}
                   className="bg-red-500 text-white px-5 py-3 rounded-lg hover:bg-red-600 transition duration-200"
                 >

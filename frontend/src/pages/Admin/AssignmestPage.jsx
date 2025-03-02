@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { createFeedback } from "../../api";
 
 // API Base URL
 const API_BASE_URL = "http://localhost:3000/api";
@@ -62,7 +63,7 @@ const AssignmentsPage = () => {
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [feedback, setFeedback] = useState("");
-  const [hoursLogged, setHoursLogged] = useState(0);
+  const [rating, setRating] = useState(1); // Default rating
   const [isEditing, setIsEditing] = useState(false);
   const [newAssignment, setNewAssignment] = useState({
     task_id: "",
@@ -88,21 +89,25 @@ const AssignmentsPage = () => {
     };
     fetchAssignments();
   }, []);
-
-  // Handle feedback submission
+  // handle feedback
   const handleFeedbackSubmit = async (assignmentId) => {
     try {
-      await updateAssignment(assignmentId, { feedback, hours_logged: hoursLogged });
+      await createFeedback({
+        assignment_id: assignmentId,
+        user_id: 1, // Replace with logged-in user ID
+        rating,
+        comment: feedback,
+      });
+
       Swal.fire({
         title: "Feedback Submitted",
-        text: `Assignment ID: ${assignmentId}\nFeedback: ${feedback}\nHours Logged: ${hoursLogged}`,
+        text: `Feedback: ${feedback}\nRating: ${rating}⭐`,
         icon: "success",
         confirmButtonText: "OK",
       });
 
-      // Reset inputs
       setFeedback("");
-      setHoursLogged(0);
+      setRating(1);
       setSelectedAssignment(null);
     } catch (error) {
       Swal.fire({
@@ -144,9 +149,14 @@ const AssignmentsPage = () => {
   // Edit an assignment
   const editAssignment = async () => {
     try {
-      const response = await updateAssignment(selectedAssignment.assignment_id, selectedAssignment);
+      const response = await updateAssignment(
+        selectedAssignment.assignment_id,
+        selectedAssignment
+      );
       const updatedAssignments = assignments.map((assign) =>
-        assign.assignment_id === selectedAssignment.assignment_id ? response : assign
+        assign.assignment_id === selectedAssignment.assignment_id
+          ? response
+          : assign
       );
       setAssignments(updatedAssignments);
       setSelectedAssignment(null);
@@ -171,7 +181,9 @@ const AssignmentsPage = () => {
   const deleteAssignment = async (assignmentId) => {
     try {
       await deleteAssignmentApi(assignmentId);
-      const updatedAssignments = assignments.filter((assign) => assign.assignment_id !== assignmentId);
+      const updatedAssignments = assignments.filter(
+        (assign) => assign.assignment_id !== assignmentId
+      );
       setAssignments(updatedAssignments);
       Swal.fire({
         title: "Assignment Deleted",
@@ -197,26 +209,34 @@ const AssignmentsPage = () => {
 
       {/* Add Assignment Form */}
       <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4 text-indigo-600">Add New Assignment</h2>
+        <h2 className="text-xl font-bold mb-4 text-indigo-600">
+          Add New Assignment
+        </h2>
         <div className="space-y-4">
           <input
             type="number"
             className="w-full border p-2 rounded-md"
             placeholder="Task ID"
             value={newAssignment.task_id}
-            onChange={(e) => setNewAssignment({ ...newAssignment, task_id: e.target.value })}
+            onChange={(e) =>
+              setNewAssignment({ ...newAssignment, task_id: e.target.value })
+            }
           />
           <input
             type="number"
             className="w-full border p-2 rounded-md"
             placeholder="User ID"
             value={newAssignment.user_id}
-            onChange={(e) => setNewAssignment({ ...newAssignment, user_id: e.target.value })}
+            onChange={(e) =>
+              setNewAssignment({ ...newAssignment, user_id: e.target.value })
+            }
           />
           <select
             className="w-full border p-2 rounded-md"
             value={newAssignment.status}
-            onChange={(e) => setNewAssignment({ ...newAssignment, status: e.target.value })}
+            onChange={(e) =>
+              setNewAssignment({ ...newAssignment, status: e.target.value })
+            }
           >
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
@@ -226,7 +246,12 @@ const AssignmentsPage = () => {
             type="date"
             className="w-full border p-2 rounded-md"
             value={newAssignment.assigned_at}
-            onChange={(e) => setNewAssignment({ ...newAssignment, assigned_at: e.target.value })}
+            onChange={(e) =>
+              setNewAssignment({
+                ...newAssignment,
+                assigned_at: e.target.value,
+              })
+            }
           />
           <button
             className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
@@ -244,11 +269,16 @@ const AssignmentsPage = () => {
             key={assignment.assignment_id}
             className="p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
           >
-            <h2 className="text-xl font-semibold text-indigo-800">Task ID: {assignment.task_id}</h2>
-            <p className="text-sm text-gray-700">User ID: {assignment.user_id}</p>
+            <h2 className="text-xl font-semibold text-indigo-800">
+              Task ID: {assignment.task_id}
+            </h2>
+            <p className="text-sm text-gray-700">
+              User ID: {assignment.user_id}
+            </p>
             <p className="text-sm text-gray-700">Status: {assignment.status}</p>
             <p className="text-sm text-gray-700">
-              Assigned At: {new Date(assignment.assigned_at).toLocaleDateString()}
+              Assigned At:{" "}
+              {new Date(assignment.assigned_at).toLocaleDateString()}
             </p>
             <div className="mt-4 space-x-4">
               <button
@@ -282,7 +312,8 @@ const AssignmentsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-indigo-600">
-              {isEditing ? "Edit Assignment" : "Submit Feedback"} for Task ID: {selectedAssignment.task_id}
+              {isEditing ? "Edit Assignment" : "Submit Feedback"} for Task ID:{" "}
+              {selectedAssignment.task_id}
             </h2>
             {isEditing ? (
               <div className="space-y-4">
@@ -292,7 +323,10 @@ const AssignmentsPage = () => {
                   placeholder="Task ID"
                   value={selectedAssignment.task_id}
                   onChange={(e) =>
-                    setSelectedAssignment({ ...selectedAssignment, task_id: e.target.value })
+                    setSelectedAssignment({
+                      ...selectedAssignment,
+                      task_id: e.target.value,
+                    })
                   }
                 />
                 <input
@@ -301,14 +335,20 @@ const AssignmentsPage = () => {
                   placeholder="User ID"
                   value={selectedAssignment.user_id}
                   onChange={(e) =>
-                    setSelectedAssignment({ ...selectedAssignment, user_id: e.target.value })
+                    setSelectedAssignment({
+                      ...selectedAssignment,
+                      user_id: e.target.value,
+                    })
                   }
                 />
                 <select
                   className="w-full border p-2 rounded-md"
                   value={selectedAssignment.status}
                   onChange={(e) =>
-                    setSelectedAssignment({ ...selectedAssignment, status: e.target.value })
+                    setSelectedAssignment({
+                      ...selectedAssignment,
+                      status: e.target.value,
+                    })
                   }
                 >
                   <option value="Pending">Pending</option>
@@ -320,7 +360,10 @@ const AssignmentsPage = () => {
                   className="w-full border p-2 rounded-md"
                   value={selectedAssignment.assigned_at}
                   onChange={(e) =>
-                    setSelectedAssignment({ ...selectedAssignment, assigned_at: e.target.value })
+                    setSelectedAssignment({
+                      ...selectedAssignment,
+                      assigned_at: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -332,13 +375,18 @@ const AssignmentsPage = () => {
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                 ></textarea>
-                <input
-                  type="number"
+
+                <select
                   className="w-full border p-2 rounded-md mb-4"
-                  placeholder="Hours logged"
-                  value={hoursLogged}
-                  onChange={(e) => setHoursLogged(e.target.value)}
-                />
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                >
+                  <option value="1">⭐ 1</option>
+                  <option value="2">⭐⭐ 2</option>
+                  <option value="3">⭐⭐⭐ 3</option>
+                  <option value="4">⭐⭐⭐⭐ 4</option>
+                  <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                </select>
               </>
             )}
             <div className="flex justify-end gap-4">
@@ -354,7 +402,9 @@ const AssignmentsPage = () => {
               <button
                 className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
                 onClick={() =>
-                  isEditing ? editAssignment() : handleFeedbackSubmit(selectedAssignment.assignment_id)
+                  isEditing
+                    ? editAssignment()
+                    : handleFeedbackSubmit(selectedAssignment.assignment_id)
                 }
               >
                 {isEditing ? "Save Changes" : "Submit"}

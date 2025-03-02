@@ -92,11 +92,7 @@ const EventS = () => {
   };
 
   const handleAddEvent = async () => {
-    if (
-      !newEvent.event_name ||
-      !newEvent.startDate ||
-      !newEvent.endDate
-    ) {
+    if (!newEvent.event_name || !newEvent.startDate || !newEvent.endDate) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -221,10 +217,18 @@ const EventS = () => {
                     {event.description}
                   </td>
                   <td className="py-3 px-4">
-                    {new Date(event.startDate).toLocaleDateString()}
+                    {new Date(event.start_date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </td>
                   <td className="py-3 px-4">
-                    {new Date(event.endDate).toLocaleDateString()}
+                    {new Date(event.end_date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </td>
                   <td className="py-3 px-4">{event.location}</td>
                   <td className="py-3 px-4 flex space-x-2">
@@ -249,7 +253,12 @@ const EventS = () => {
       </div>
 
       {/* Add Event Dialog */}
-      <Dialog open={isAddDialogOpen} onClose={closeAddDialog} maxWidth="sm" fullWidth>
+      <Dialog
+        open={isAddDialogOpen}
+        onClose={closeAddDialog}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle className="pb-2">Add Event</DialogTitle>
         <DialogContent className="max-h-96 overflow-y-auto pt-2">
           <div className="grid grid-cols-1 gap-4 mt-6">
@@ -333,7 +342,12 @@ const EventS = () => {
       </Dialog>
 
       {/* Edit Event Dialog */}
-      <Dialog open={isEditDialogOpen} onClose={closeEditDialog} maxWidth="sm" fullWidth>
+      <Dialog
+        open={isEditDialogOpen}
+        onClose={closeEditDialog}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle className="pb-2">Edit Event</DialogTitle>
         <DialogContent className="max-h-96 overflow-y-auto pt-2">
           <div className="grid grid-cols-1 gap-4 mt-6">
@@ -341,7 +355,10 @@ const EventS = () => {
               label="Event Name"
               value={editingEvent.event_name}
               onChange={(e) =>
-                setEditingEvent((prev) => ({ ...prev, event_name: e.target.value }))
+                setEditingEvent((prev) => ({
+                  ...prev,
+                  event_name: e.target.value,
+                }))
               }
               fullWidth
               required

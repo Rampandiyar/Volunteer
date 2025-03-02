@@ -38,55 +38,51 @@ export const getAssignedTasks = async (req, res) => {
   }
 };
 
-// Get upcoming events with available tasks
 export const getUpcomingEvents = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Get upcoming events
-    const eventsQuery = await pool.query(
+    const query = await pool.query(
       `SELECT 
         e.event_id,
         e.event_name,
         e.description,
         e.start_date,
-        e.location
+        e.location,
+        t.task_id,
+        t.task_name
        FROM Events e
-       WHERE e.start_date >= CURRENT_DATE
+       LEFT JOIN Tasks t ON e.event_id = t.event_id
+       LEFT JOIN Assignments a ON t.task_id = a.task_id
+       WHERE e.start_date >= CURRENT_DATE 
+       AND (a.assignment_id IS NULL OR a.user_id != $1)
        ORDER BY e.start_date ASC
-       LIMIT 5`
+       LIMIT 5`,
+      [userId]
     );
 
-    // For each event, get available tasks
-    const events = await Promise.all(
-      eventsQuery.rows.map(async (event) => {
-        // Get tasks for this event that aren't assigned yet
-        const tasksQuery = await pool.query(
-          `SELECT 
-            t.task_id,
-            t.task_name
-           FROM Tasks t
-           LEFT JOIN Assignments a ON t.task_id = a.task_id
-           WHERE t.event_id = $1 AND (a.assignment_id IS NULL OR a.user_id != $2)
-           LIMIT 3`,
-          [event.event_id, userId]
-        );
-
-        return {
-          id: event.event_id,
-          title: event.event_name,
-          description: event.description,
-          date: new Date(event.start_date).toISOString().split("T")[0],
-          location: event.location,
-          availableTasks: tasksQuery.rows.map((task) => ({
-            id: task.task_id,
-            name: task.task_name,
-          })),
+    // Group tasks by event
+    const eventMap = {};
+    query.rows.forEach((row) => {
+      if (!eventMap[row.event_id]) {
+        eventMap[row.event_id] = {
+          id: row.event_id,
+          title: row.event_name,
+          description: row.description,
+          date: new Date(row.start_date).toISOString().split("T")[0],
+          location: row.location,
+          availableTasks: [],
         };
-      })
-    );
+      }
+      if (row.task_id) {
+        eventMap[row.event_id].availableTasks.push({
+          id: row.task_id,
+          name: row.task_name,
+        });
+      }
+    });
 
-    res.json(events);
+    res.json(Object.values(eventMap));
   } catch (error) {
     console.error("Error getting upcoming events:", error);
     res.status(500).json({ message: "Server error" });

@@ -9,6 +9,7 @@ import {
   getVolunteerCheckIns,
   getVolunteerHours,
   getUserById,
+  getVolunteersCheckIns,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.delete("/delete/:id", deleteUser); // Delete user
 router.get("/get/:id", getUserById);
 // Volunteer tracking routes
 router.get("/checkins", getVolunteerCheckIns); // Get all check-ins
+router.get("/volunteers/checkins", getVolunteersCheckIns); // Get all check-ins
 router.get("/hours", getVolunteerHours); // Get volunteer hours
 
 export default router;

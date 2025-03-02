@@ -12,8 +12,9 @@ import assignmentRoutes from "./routes/assignmentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import adashboardRoutes from "./routes/Adashboardroutes.js";
 import volunteerRoutes from "./routes/VolunteerRoutes.js";
-import volunteerProfileRoutes from "./routes/volunteerProfileRoutes.js";
 import dashboardRoutes from "./routes/DashboardRoutes.js";
+import feedbackRoutes from "./routes/Feedbackroutes.js";
+import activitylogroutes from "./routes/Activitylogroutes.js";
 
 dotenv.config();
 const { Pool } = pkg;
@@ -59,15 +60,18 @@ const initializeDatabase = async () => {
   }
 };
 
+//BACKEND ROUTES
+
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/dashboard", adashboardRoutes);
+app.use("/api/adashboard", adashboardRoutes);
 app.use("/api/volunteer", volunteerRoutes);
-app.use("/api/volunteerprofile", volunteerProfileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/activitylogs", activitylogroutes);
 
 // Default route
 app.get("/", (req, res) => {

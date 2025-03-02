@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { getAllcheckins, getAllhours } from "../../api"; // Import API functions
+import { getAllscheckins, getAllhours } from "../../api"; // Import API functions
 
-function VolunteerLogViewer({ userId }) {
-  // Accept userId as a prop
+function AdminVolunteerLogViewer() {
   const [logs, setLogs] = useState([]);
   const [totalHours, setTotalHours] = useState(0);
   const [filter, setFilter] = useState({
@@ -14,7 +13,7 @@ function VolunteerLogViewer({ userId }) {
   useEffect(() => {
     const fetchCheckIns = async () => {
       try {
-        const data = await getAllcheckins(userId); // Pass userId to fetch specific logs
+        const data = await getAllscheckins(); // Use the API function
         setLogs(data);
       } catch (error) {
         console.error("Error fetching check-ins:", error);
@@ -22,34 +21,33 @@ function VolunteerLogViewer({ userId }) {
     };
 
     fetchCheckIns();
-  }, [userId]);
-
-  // Fetch total hours from backend
+  }, []);
+  //fetch total hours from backend
   useEffect(() => {
     const fetchTotalHours = async () => {
       try {
-        const data = await getAllhours(userId); // Pass userId for filtering
-        setTotalHours(data.length > 0 ? data[0].total_hours || 0 : 0);
+        const data = await getAllhours(); // Fetch data
+        setTotalHours(data.length > 0 ? data[0].total_hours || 0 : 0); // Extract total_hours safely
       } catch (error) {
         console.error("Error fetching total hours:", error);
       }
     };
 
     fetchTotalHours();
-  }, [userId]);
+  }, []);
 
   // Filter logs based on input fields
   const filteredLogs = logs.filter((log) => {
     return (
       (filter.date
         ? new Date(log.checkin_time).toLocaleDateString().includes(filter.date)
-        : true) &&
+        : true) && // Fixed: format date consistently for filtering
       (filter.volunteer
         ? log.user_id
             .toString()
             .toLowerCase()
             .includes(filter.volunteer.toLowerCase())
-        : true)
+        : true) // Fixed: explicitly convert to lowercase
     );
   });
 
@@ -59,7 +57,7 @@ function VolunteerLogViewer({ userId }) {
 
     const hours =
       (new Date(checkoutTime) - new Date(checkinTime)) / (1000 * 60 * 60);
-    return hours.toFixed(2);
+    return hours.toFixed(2); // Fixed: format hours with 2 decimal places
   };
 
   return (
@@ -68,7 +66,7 @@ function VolunteerLogViewer({ userId }) {
         <header className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-4xl font-extrabold text-white mb-2">
-              {userId ? "My Volunteer Logs" : "All Volunteer Logs"}
+              Volunteer Activity Logs
             </h1>
             <p className="text-indigo-200">
               Track volunteer hours and activities
@@ -77,6 +75,7 @@ function VolunteerLogViewer({ userId }) {
         </header>
 
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6">
+          {/* Filter Inputs */}
           <div className="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0 mb-4">
             <input
               type="date"
@@ -85,21 +84,22 @@ function VolunteerLogViewer({ userId }) {
               className="border px-4 py-2 rounded-lg bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Filter by date"
             />
-            {!userId && ( // Show volunteer filter only for admins
-              <input
-                type="text"
-                value={filter.volunteer}
-                onChange={(e) =>
-                  setFilter({ ...filter, volunteer: e.target.value })
-                }
-                className="border px-4 py-2 rounded-lg bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-                placeholder="Filter by volunteer"
-              />
-            )}
+            <input
+              type="text"
+              value={filter.volunteer}
+              onChange={(e) =>
+                setFilter({ ...filter, volunteer: e.target.value })
+              }
+              className="border px-4 py-2 rounded-lg bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="Filter by volunteer"
+            />
           </div>
         </div>
 
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 overflow-x-auto">
+          {" "}
+          {/* Fixed: added overflow-x-auto for mobile responsiveness */}
+          {/* Logs Table */}
           <table className="table-auto w-full border-collapse border text-white">
             <thead>
               <tr>
@@ -132,15 +132,17 @@ function VolunteerLogViewer({ userId }) {
           </table>
         </div>
 
+        {/* Report */}
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
           <h2 className="text-xl font-semibold mb-4">Report</h2>
           <p className="text-lg">
             Total Hours Logged: {Number(totalHours).toFixed(2)}
-          </p>
+          </p>{" "}
+          {/* Fixed: format with 2 decimal places */}
         </div>
       </div>
     </div>
   );
 }
 
-export default VolunteerLogViewer;
+export default AdminVolunteerLogViewer;

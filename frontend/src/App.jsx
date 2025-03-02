@@ -23,11 +23,12 @@ import AdminTasks from "./pages/Admin/TaskAdmin.jsx";
 import VolunteerLogViewer from "./pages/Admin/VolunteerLogViewer.jsx";
 import SendNotification from "./pages/Admin/SendNotification.jsx";
 import AdminDashboard from "./pages/Admin/DashboardAdmin.jsx";
-import VolunteerProfile from "./pages/Volunteer/Volunteerprofile.jsx";
+import AdminVolunteerLogViewer from "./pages/Admin/Adminlogviewer.jsx";
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId"); // Fetch from localStorage or state
 
   // Check if there's a value in localStorage (e.g., a logged-in user's token or session)
   const userRole = localStorage.getItem("userRole"); // Replace "userToken" with your actual key
@@ -71,9 +72,9 @@ function App() {
     "/assignmentspage",
     "/admintasks",
     "/admindashboard",
-    "/volunteer",
     "/volunteerlogviewer",
     "/sendnotification",
+    "/adminvolunteerlogviewer",
   ].includes(location.pathname.toLowerCase()); // Normalize path for comparison
 
   // Define routes for Volunteer
@@ -82,8 +83,10 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/task" element={<TaskManagement />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/volunteer" element={<VolunteerProfile />} />
-      <Route path="/volunteerlogviewer" element={<VolunteerLogViewer />} />
+      <Route
+        path="/volunteerlogviewer"
+        element={<VolunteerLogViewer userId={userId} />}
+      />
     </>
   );
 
@@ -97,7 +100,10 @@ function App() {
       <Route path="/events" element={<EventS />} />
       <Route path="/assignmentspage" element={<AssignmentsPage />} />
       <Route path="/admintasks" element={<AdminTasks />} />
-      <Route path="/volunteerlogviewer" element={<VolunteerLogViewer />} />
+      <Route
+        path="/adminvolunteerlogviewer"
+        element={<AdminVolunteerLogViewer />}
+      />
       <Route path="/sendnotification" element={<SendNotification />} />
     </>
   );

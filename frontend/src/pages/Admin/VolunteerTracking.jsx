@@ -13,40 +13,7 @@ import {
 } from "recharts";
 
 function VolunteerTracking() {
-  const [logs] = useState([
-    {
-      id: 1,
-      task: "Decorations",
-      status: "Completed",
-      hours: 3,
-      date: "2025-02-01",
-      category: "Event Management",
-    },
-    {
-      id: 2,
-      task: "Registration Desk",
-      status: "In Progress",
-      hours: 5,
-      date: "2025-02-03",
-      category: "Event Management",
-    },
-    {
-      id: 3,
-      task: "Technical Support",
-      status: "Completed",
-      hours: 2,
-      date: "2025-02-05",
-      category: "Technical",
-    },
-    {
-      id: 4,
-      task: "Catering",
-      status: "Completed",
-      hours: 4,
-      date: "2025-02-07",
-      category: "Logistics",
-    },
-  ]);
+  const [logs] = useState([]);
 
   const [filter, setFilter] = useState("All");
 
@@ -105,11 +72,15 @@ function VolunteerTracking() {
         <div className="max-w-full overflow-hidden">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg shadow-lg space-y-4">
-              <h2 className="text-xl font-semibold text-indigo-700">Total Hours Logged</h2>
+              <h2 className="text-xl font-semibold text-indigo-700">
+                Total Hours Logged
+              </h2>
               <p className="text-2xl font-bold text-indigo-900">{totalHours}</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-lg space-y-4">
-              <h2 className="text-xl font-semibold text-indigo-700">Task Status Distribution</h2>
+              <h2 className="text-xl font-semibold text-indigo-700">
+                Task Status Distribution
+              </h2>
               <PieChart width={300} height={200}>
                 <Pie
                   data={taskStatuses}
@@ -122,7 +93,10 @@ function VolunteerTracking() {
                   label
                 >
                   {taskStatuses.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -133,9 +107,11 @@ function VolunteerTracking() {
 
         {/* Hours Logged Over Time (Moved and enlarged) */}
         <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
-          <h2 className="text-xl font-semibold text-indigo-700">Hours Logged Over Time</h2>
+          <h2 className="text-xl font-semibold text-indigo-700">
+            Hours Logged Over Time
+          </h2>
           <BarChart
-            width={900}  // Increased width
+            width={900} // Increased width
             height={500} // Increased height
             data={logs}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
@@ -151,13 +127,17 @@ function VolunteerTracking() {
 
         {/* Activity Log */}
         <div className="bg-white p-6 rounded-lg shadow-lg mt-8 overflow-x-auto">
-          <h2 className="text-xl font-semibold text-indigo-700 mb-4">Detailed Logs</h2>
+          <h2 className="text-xl font-semibold text-indigo-700 mb-4">
+            Detailed Logs
+          </h2>
           <table className="w-full table-auto border-collapse border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
                 <th className="border border-gray-300 px-4 py-2">Task</th>
                 <th className="border border-gray-300 px-4 py-2">Status</th>
-                <th className="border border-gray-300 px-4 py-2">Hours Logged</th>
+                <th className="border border-gray-300 px-4 py-2">
+                  Hours Logged
+                </th>
                 <th className="border border-gray-300 px-4 py-2">Date</th>
                 <th className="border border-gray-300 px-4 py-2">Category</th>
               </tr>
@@ -165,11 +145,21 @@ function VolunteerTracking() {
             <tbody>
               {filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2">{log.task}</td>
-                  <td className="border border-gray-300 px-4 py-2">{log.status}</td>
-                  <td className="border border-gray-300 px-4 py-2">{log.hours}</td>
-                  <td className="border border-gray-300 px-4 py-2">{log.date}</td>
-                  <td className="border border-gray-300 px-4 py-2">{log.category}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {log.task}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {log.status}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {log.hours}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {log.date}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {log.category}
+                  </td>
                 </tr>
               ))}
             </tbody>

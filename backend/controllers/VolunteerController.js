@@ -8,24 +8,20 @@ export const getVolunteers = async (req, res) => {
         u.username,
         u.year,
         u.department, 
-        u.email, 
-        u.phone, 
-        vp.skills, 
-        vp.availability,
-        t.task_id,
-        t.task_name,
-        t.description AS task_description,
-        t.status AS task_status
+        u.skills, 
+        u.availability,
+        COALESCE(ROUND(AVG(f.rating), 1), 0) AS avg_rating
       FROM Users u
-      LEFT JOIN VolunteerProfiles vp ON u.user_id = vp.user_id
       LEFT JOIN Assignments a ON u.user_id = a.user_id
-      LEFT JOIN Tasks t ON a.task_id = t.task_id
+      LEFT JOIN Feedback f ON a.assignment_id = f.assignment_id
       WHERE u.role = 'Volunteer'
+      GROUP BY u.user_id
     `;
+
     const { rows } = await pool.query(query);
     res.json(rows);
   } catch (error) {
-    console.error("Error fetching volunteers:", error);
+    console.error("Error fetching volunteer details with ratings:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

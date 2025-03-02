@@ -52,15 +52,8 @@ export const getTaskCompletion = async (req, res) => {
 // Get top volunteers by hours
 export const getTopVolunteers = async (req, res) => {
   try {
-    const query = `
-      SELECT u.username as name, SUM(a.hours_logged) as hours
-      FROM Users u
-      JOIN ActivityLogs a ON u.user_id = a.user_id
-      WHERE u.role = 'Volunteer'
-      GROUP BY u.username
-      ORDER BY hours DESC
-      LIMIT 5
-    `;
+    const query = `SELECT u.username as name, SUM(a.hours_logged) as hours FROM Users u JOIN ActivityLogs a ON u.user_id = a.user_id
+      WHERE u.role = 'Volunteer' GROUP BY u.username ORDER BY hours DESC LIMIT 5`;
 
     const result = await pool.query(query);
     res.json(result.rows);

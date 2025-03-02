@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { jsPDF } from "jspdf";
 import {
   getAssignedTasks,
   getUpcomingEvents,
   getTaskStatistics,
   getDashboardNotifications,
 } from "../../api"; // Import the API functions
-
 function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
@@ -17,7 +17,7 @@ function Dashboard() {
     completedTasks: 0,
     totalHoursLogged: 0,
   });
-
+  const [userName, setUserName] = useState("");
   const userId = 1; // Replace with the actual logged-in user ID
 
   // Fetch data from the backend
@@ -81,6 +81,30 @@ function Dashboard() {
     ]);
   };
 
+  //generate certificate
+  const generateCertificate = () => {
+    if (!userName) {
+      alert("Please enter your name before generating the certificate.");
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("Certificate of Completion", 105, 40, { align: "center" });
+
+    doc.setFontSize(16);
+    doc.text(`This is to certify that`, 105, 60, { align: "center" });
+    doc.setFontSize(18);
+    doc.text(userName, 105, 75, { align: "center" });
+    doc.setFontSize(16);
+    doc.text("has successfully completed the assigned tasks.", 105, 90, {
+      align: "center",
+    });
+
+    doc.save("certificate.pdf");
+  };
+
   // Calculate total hours logged for all tasks
   const totalHoursLogged = tasks.reduce(
     (acc, task) => acc + task.hoursLogged,
@@ -102,27 +126,21 @@ function Dashboard() {
         <div className="lg:col-span-2 space-y-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6">
           <h2 className="text-3xl font-bold text-white mb-8">Assigned Tasks</h2>
           <div className="space-y-4">
-            {tasks
-              .filter((task) => task.status === "assigned")
-              .map((task) => (
-                <div
-                  key={task.id}
-                  className="bg-white/20 backdrop-blur-lg hover:bg-white/30 transition rounded-xl p-4 cursor-pointer"
-                  onClick={() => handleTaskClick(task)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold text-white">{task.name}</h3>
-                      <p className="text-sm text-indigo-200">
-                        {task.description}
-                      </p>
-                    </div>
-                    <div className="text-sm text-gray-200">
-                      Skills: {task.skillsRequired}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {tasks.length > 0 ? (
+              <ul className="space-y-4">
+                {tasks.map((task) => (
+                  <li key={task.id} className="bg-white/20 p-4 rounded-xl">
+                    <p className="text-sm text-gray-400">Task ID: {task.id}</p>
+                    <h3 className="font-semibold text-white">{task.name}</h3>
+                    <p className="text-sm text-indigo-200">
+                      {task.description}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-200">No assigned tasks.</p>
+            )}
           </div>
         </div>
 
@@ -154,50 +172,29 @@ function Dashboard() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="space-y-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-          <h2 className="text-3xl font-bold text-white mb-8">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Upcoming Events
           </h2>
-          <div className="space-y-6">
-            {events.map((event) => (
-              <div key={event.id} className="border-b pb-6 last:border-b-0">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold text-2xl text-white">
-                      {event.title}
-                    </h3>
-                    <p className="text-lg text-indigo-200">
-                      {event.description}
-                    </p>
-                    <p className="text-sm text-indigo-400 mt-2">
-                      Date: {event.date}
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold text-gray-200 mb-2">
-                      Available Tasks
-                    </h4>
-                    {event.availableTasks.map((task) => (
-                      <button
-                        key={task.id}
-                        className="block w-full bg-indigo-500 text-white px-4 py-2 rounded-lg text-base hover:bg-indigo-600 transition"
-                        onClick={() =>
-                          handleApplyForEventTask(event.id, task.name)
-                        }
-                      >
-                        {task.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {events.length > 0 ? (
+            <ul className="space-y-4">
+              {events.map((event) => (
+                <li key={event.id} className="bg-white/20 p-4 rounded-md">
+                  <p className="text-sm text-gray-400">Event ID: {event.id}</p>
+                  <h3 className="text-lg font-semibold">{event.title}</h3>
+                  <p className="text-sm">{event.description}</p>
+                  <p className="text-sm text-gray-300">📅 {event.date}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-200">No upcoming events.</p>
+          )}
         </div>
       </div>
 
       {/* Notifications */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
+      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mt-10">
         <h2 className="text-lg font-semibold text-white mb-4">Notifications</h2>
         <ul>
           {notifications.map((notification) => (
@@ -216,7 +213,26 @@ function Dashboard() {
           ))}
         </ul>
       </div>
-
+      {/* Certificate Generation Section */}
+      <div className="mt-10 p-6 bg-white/10 backdrop-blur-lg rounded-2xl text-center">
+        <h2 className="text-xl font-bold text-white mb-4">
+          Generate Certificate
+        </h2>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          className="p-2 rounded-md text-black w-64 mb-4"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+        />
+        <br />
+        <button
+          onClick={generateCertificate}
+          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+        >
+          Download Certificate
+        </button>
+      </div>
       {/* Task Details Modal */}
       {selectedTask && (
         <div className="fixed inset-0 z-20 bg-black bg-opacity-50 flex justify-center items-center">

@@ -34,14 +34,13 @@ function AdminDashboard() {
   ]);
   const [volunteerHoursData, setVolunteerHoursData] = useState([]);
   const [topVolunteer, setTopVolunteer] = useState({
-    name: "No data",
-    hours: 0,
+    name: "Volunteer",
+    hours: 5,
   });
   const [recentActivityLogs, setRecentActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const COLORS = ["#4CAF50", "#FF7043"];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,18 +61,18 @@ function AdminDashboard() {
           },
         ]);
 
-        // Fetch top volunteers by hours
-        const topVolunteersResponse = await getTopVolunteersByHours();
-        setVolunteerHoursData(topVolunteersResponse);
-
         // Fetch top volunteer of the month
         const topVolunteerResponse = await getTopVolunteerOfMonth();
         setTopVolunteer(topVolunteerResponse);
 
         // Fetch recent activity logs
         const activityLogsResponse = await getActivityLogs();
-        setRecentActivityLogs(activityLogsResponse);
-
+        const formattedActivityLogs = activityLogsResponse.map((log) => ({
+          id: log.log_id, // Use `log_id` as the unique identifier
+          date: log.log_date, // Use `log_date` for the date
+          activity: `User ${log.user_id} logged ${log.hours_logged} hours for Task ${log.task_id}`, // Create a meaningful activity description
+        }));
+        setRecentActivityLogs(formattedActivityLogs);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -144,17 +143,6 @@ function AdminDashboard() {
             </div>
           </div>
 
-          {/* Top Volunteer Badge */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
-            <h2 className="text-lg font-semibold text-white">
-              Top Volunteer of the Month
-            </h2>
-            <p className="text-3xl font-bold">{topVolunteer.name}</p>
-            <p className="text-sm text-indigo-200">
-              Logged Hours: {topVolunteer.hours}
-            </p>
-          </div>
-
           {/* Charts Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             {/* Task Completion Chart */}
@@ -187,12 +175,12 @@ function AdminDashboard() {
             {/* Volunteer Hours Chart */}
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">
-                Volunteer Hours Logged
+                Task completeion Bar graph
               </h2>
               <BarChart
                 width={400}
                 height={300}
-                data={volunteerHoursData}
+                data={taskCompletionData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
@@ -200,24 +188,12 @@ function AdminDashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="hours" fill="#4CAF50" />
+                <Bar dataKey="value">
+                  <Cell fill="#4CAF50" /> {/* Green for Completed */}
+                  <Cell fill="#FF7043" /> {/* Orange for Remaining */}
+                </Bar>
               </BarChart>
             </div>
-          </div>
-
-          {/* Recent Activity Logs */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-10">
-            <h2 className="text-lg font-semibold text-white mb-4">
-              Recent Activity Logs
-            </h2>
-            <ul>
-              {recentActivityLogs.map((log) => (
-                <li key={log.id} className="mb-4">
-                  <p className="text-sm text-indigo-200">{log.date}</p>
-                  <p>{log.activity}</p>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Export Buttons */}

@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { createUser } from '../../api'; // Import the API function
+import { useState, useEffect } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { createUser } from "../../api"; // Import the API function
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
+  const navigate = useNavigate();
   // Clear localStorage on component mount (optional)
   localStorage.clear();
 
   // State for form data
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    phone: '',
-    role: '',
-    year: '',
-    department: '',
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+    role: "",
+    year: "",
+    department: "",
   });
 
   // State for form errors and touched fields
@@ -29,58 +31,60 @@ function Signup() {
   const [departments, setDepartments] = useState([]);
 
   // State for success and error messages
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch years and departments on component mount
   useEffect(() => {
     // Simulate fetching from API
-    setYears(['1', '2', '3', '4']);
-    setDepartments(['Computer Science', 'Mechanical', 'Electrical', 'Civil']);
+    setYears(["1", "2", "3", "4"]);
+    setDepartments(["Computer Science", "Mechanical", "Electrical", "Civil"]);
   }, []);
 
   // Field validation function
   const validateField = (username, value) => {
     switch (username) {
-      case 'username':
-        if (!value) return 'Name is required';
-        if (value.length < 2) return 'Name must be at least 2 characters';
-        return '';
+      case "username":
+        if (!value) return "Name is required";
+        if (value.length < 2) return "Name must be at least 2 characters";
+        return "";
 
-      case 'email':
-        if (!value) return 'Email is required';
+      case "email":
+        if (!value) return "Email is required";
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) return 'Invalid email address';
-        return '';
+        if (!emailRegex.test(value)) return "Invalid email address";
+        return "";
 
-      case 'password':
-        if (!value) return 'Password is required';
-        if (value.length < 8) return 'Password must be at least 8 characters';
-        if (!/[A-Z]/.test(value)) return 'Must contain at least one uppercase letter';
-        if (!/[a-z]/.test(value)) return 'Must contain at least one lowercase letter';
-        if (!/[0-9]/.test(value)) return 'Must contain at least one number';
-        return '';
+      case "password":
+        if (!value) return "Password is required";
+        if (value.length < 8) return "Password must be at least 8 characters";
+        if (!/[A-Z]/.test(value))
+          return "Must contain at least one uppercase letter";
+        if (!/[a-z]/.test(value))
+          return "Must contain at least one lowercase letter";
+        if (!/[0-9]/.test(value)) return "Must contain at least one number";
+        return "";
 
-      case 'phone':
-        if (!value) return 'Phone number is required';
+      case "phone":
+        if (!value) return "Phone number is required";
         const phoneRegex = /^[0-9]{10}$/;
-        if (!phoneRegex.test(value)) return 'Invalid phone number';
-        return '';
+        if (!phoneRegex.test(value)) return "Invalid phone number";
+        return "";
 
-      case 'role':
-        if (!value) return 'Role is required';
-        return '';
+      case "role":
+        if (!value) return "Role is required";
+        return "";
 
-      case 'year':
-        if (!value) return 'Year is required';
-        return '';
+      case "year":
+        if (!value) return "Year is required";
+        return "";
 
-      case 'department':
-        if (!value) return 'Department is required';
-        return '';
+      case "department":
+        if (!value) return "Department is required";
+        return "";
 
       default:
-        return '';
+        return "";
     }
   };
 
@@ -125,29 +129,32 @@ function Signup() {
     }, {});
 
     setErrors(fieldErrors);
-    setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    setTouched(
+      Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+    );
 
     // If no errors, submit the form
     if (Object.values(fieldErrors).every((error) => !error)) {
       try {
         const response = await createUser(formData); // Call the API
-        setSuccessMessage('User created successfully!');
-        setErrorMessage('');
-        console.log('User created successfully:', response);
+        setSuccessMessage("User created successfully!");
+        setErrorMessage("");
+        navigate("/login");
+        console.log("User created successfully:", response);
         // Optionally, redirect to login page or clear the form
         setFormData({
-          username: '',
-          email: '',
-          password: '',
-          phone: '',
-          role: '',
-          year: '',
-          department: '',
+          username: "",
+          email: "",
+          password: "",
+          phone: "",
+          role: "",
+          year: "",
+          department: "",
         });
       } catch (error) {
-        setErrorMessage('Error creating user. Please try again.');
-        setSuccessMessage('');
-        console.error('Error creating user:', error);
+        setErrorMessage("Error creating user. Please try again.");
+        setSuccessMessage("");
+        console.error("Error creating user:", error);
       }
     }
   };
@@ -178,11 +185,13 @@ function Signup() {
         {/* Signup Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name, Email, and Phone Fields */}
-          {['username', 'email', 'phone'].map((field) => (
+          {["username", "email", "phone"].map((field) => (
             <div key={field}>
-              <label className="block text-gray-700 font-medium mb-2 capitalize">{field}</label>
+              <label className="block text-gray-700 font-medium mb-2 capitalize">
+                {field}
+              </label>
               <input
-                type={field === 'email' ? 'email' : 'text'}
+                type={field === "email" ? "email" : "text"}
                 name={field}
                 value={formData[field]}
                 onChange={handleChange}
@@ -191,17 +200,21 @@ function Signup() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
               {touched[field] && errors[field] && (
-                <p className="text-red-500 text-sm mt-1 animate-pulse">{errors[field]}</p>
+                <p className="text-red-500 text-sm mt-1 animate-pulse">
+                  {errors[field]}
+                </p>
               )}
             </div>
           ))}
 
           {/* Password Field */}
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Password
+            </label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -218,14 +231,18 @@ function Signup() {
               </button>
             </div>
             {touched.password && errors.password && (
-              <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1 animate-pulse">
+                {errors.password}
+              </p>
             )}
           </div>
 
           {/* Role, Year, and Department Fields */}
-          {['role', 'year', 'department'].map((field) => (
+          {["role", "year", "department"].map((field) => (
             <div key={field}>
-              <label className="block text-gray-700 font-medium mb-2 capitalize">{field}</label>
+              <label className="block text-gray-700 font-medium mb-2 capitalize">
+                {field}
+              </label>
               <select
                 name={field}
                 value={formData[field]}
@@ -234,9 +251,9 @@ function Signup() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
                 <option value="">{`Select ${field}`}</option>
-                {(field === 'role'
-                  ? ['Admin', 'Volunteer']
-                  : field === 'year'
+                {(field === "role"
+                  ? ["Admin", "Volunteer"]
+                  : field === "year"
                   ? years
                   : departments
                 ).map((option) => (
@@ -246,7 +263,9 @@ function Signup() {
                 ))}
               </select>
               {touched[field] && errors[field] && (
-                <p className="text-red-500 text-sm mt-1 animate-pulse">{errors[field]}</p>
+                <p className="text-red-500 text-sm mt-1 animate-pulse">
+                  {errors[field]}
+                </p>
               )}
             </div>
           ))}

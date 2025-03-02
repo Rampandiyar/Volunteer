@@ -16,7 +16,7 @@
     "@reduxjs/toolkit": "^2.5.0",
     "aos": "^2.3.4",
     "api": "^6.1.2",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "esbuild": "^0.24.2",

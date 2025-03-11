@@ -40,16 +40,19 @@ function VolunteerLogViewer({ userId }) {
 
   // Filter logs based on input fields
   const filteredLogs = logs.filter((log) => {
+    // Convert date to YYYY-MM-DD format for comparison
+    const logDate = new Date(log.checkin_time).toISOString().split("T")[0];
+    const filterDate = filter.date
+      ? new Date(filter.date).toISOString().split("T")[0]
+      : null;
+
     return (
-      (filter.date
-        ? new Date(log.checkin_time).toLocaleDateString().includes(filter.date)
-        : true) &&
-      (filter.volunteer
-        ? log.user_id
-            .toString()
-            .toLowerCase()
-            .includes(filter.volunteer.toLowerCase())
-        : true)
+      (!filter.date || logDate === filterDate) && // Date comparison
+      (!filter.volunteer ||
+        log.user_id
+          ?.toString()
+          .toLowerCase()
+          .includes(filter.volunteer.toLowerCase())) // User ID filter
     );
   });
 

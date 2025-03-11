@@ -178,7 +178,16 @@ export const createTask = async (taskData) => {
     throw error;
   }
 };
-
+// Get all assignments for a specific user
+export const getUserAssignments = async (userId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/tasks/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user assignments:", error);
+    throw error;
+  }
+};
 export const getAllTasks = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/tasks`);
@@ -188,7 +197,6 @@ export const getAllTasks = async () => {
     throw error;
   }
 };
-
 export const updateTask = async (id, taskData) => {
   try {
     const response = await axios.put(`${API_BASE_URL}/tasks/${id}`, taskData);
@@ -265,7 +273,7 @@ export const getAssignment = async () => {
     throw error;
   }
 };
-
+// Notifications API
 export const sendNotification = async (notificationData) => {
   try {
     const response = await axios.post(

@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-import { UserCircle, Calendar, Building2, Star } from "lucide-react";
-import { motion } from "framer-motion";
-import { getVolunteers, getFeedbackByVolunteer } from "../../api";
+import {
+  UserCircle,
+  Calendar,
+  Building2,
+  Star,
+  Mail,
+  User,
+} from "lucide-react";
+import { getVolunteers } from "../../api";
 
 const VolunteerManagement = () => {
-  const [searchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filterCriteria, setFilterCriteria] = useState({
     skills: "",
     availability: "",
@@ -18,34 +24,7 @@ const VolunteerManagement = () => {
       try {
         const data = await getVolunteers();
         console.log("Fetched volunteers:", data); // Debugging log
-
-        // Fetch ratings for each volunteer
-        const volunteerRatings = await Promise.all(
-          data.map(async (volunteer) => {
-            try {
-              const feedback = await getFeedbackByVolunteer(volunteer.user_id);
-
-              // Calculate average rating if multiple feedbacks exist
-              const avgRating =
-                feedback.length > 0
-                  ? (
-                      feedback.reduce((sum, fb) => sum + (fb.rating || 0), 0) /
-                      feedback.length
-                    ).toFixed(1)
-                  : "Not Rated";
-
-              return { ...volunteer, rating: avgRating };
-            } catch (error) {
-              console.error(
-                `Failed to fetch feedback for user ${volunteer.user_id}:`,
-                error
-              );
-              return { ...volunteer, rating: "Not Rated" }; // Prevent breaking the entire process
-            }
-          })
-        );
-
-        setVolunteers(volunteerRatings);
+        setVolunteers(data);
       } catch (error) {
         console.error("Failed to fetch volunteers:", error);
       } finally {
@@ -99,6 +78,17 @@ const VolunteerManagement = () => {
               Manage your volunteers efficiently
             </p>
           </div>
+
+          {/* Optional: Add search input here */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search volunteers..."
+              className="px-4 py-2 bg-white/20 rounded-lg text-white w-64"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </header>
 
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-lg">
@@ -106,7 +96,9 @@ const VolunteerManagement = () => {
             <thead className="bg-white/20 border-b">
               <tr>
                 {[
+                  "User ID",
                   "Name",
+                  "Email",
                   "Year",
                   "Department",
                   "Skills",
@@ -115,7 +107,7 @@ const VolunteerManagement = () => {
                 ].map((header) => (
                   <th
                     key={header}
-                    className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
                   >
                     {header}
                   </th>
@@ -124,35 +116,49 @@ const VolunteerManagement = () => {
             </thead>
             <tbody>
               {filteredVolunteers.map((volunteer) => (
-                <motion.tr
+                <tr
                   key={volunteer.user_id}
-                  whileHover={{ scale: 1.02 }}
-                  className="hover:bg-white/10 transition-all duration-200 border-b last:border-b-0"
+                  className="hover:bg-white/10 transition-all duration-200 border-b border-white/10 last:border-b-0"
                 >
                   <td className="px-6 py-4 flex items-center">
-                    <UserCircle className="mr-4 text-indigo-500" size={28} />
+                    <UserCircle className="mr-4 text-indigo-300" size={28} />
                     <span className="font-medium text-lg">
+                      {volunteer.user_id}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center text-sm">
                       {volunteer.username}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center text-sm">
+                      <Mail className="mr-2 text-gray-300" size={18} />
+                      {volunteer.email}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-lg">{volunteer.year}</td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center text-sm">
-                      <Building2 className="mr-2 text-gray-500" size={18} />
+                      <Building2 className="mr-2 text-gray-300" size={18} />
                       {volunteer.department}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       {volunteer.skills && Array.isArray(volunteer.skills) ? (
                         volunteer.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="bg-indigo-100 text-indigo-800 text-xs px-3 py-2 rounded-full"
+                            className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full"
                           >
                             {skill}
                           </span>
                         ))
+                      ) : volunteer.skills ? (
+                        <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+                          {volunteer.skills}
+                        </span>
                       ) : (
                         <span className="text-gray-400">No skills listed</span>
                       )}
@@ -160,19 +166,19 @@ const VolunteerManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center text-sm">
-                      <Calendar className="mr-2 text-gray-500" size={18} />
+                      <Calendar className="mr-2 text-gray-300" size={18} />
                       {volunteer.availability}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center text-sm">
-                      <Star className="mr-2 text-yellow-500" size={18} />
-                      {volunteer.avg_rating
+                      <Star className="mr-2 text-yellow-300" size={18} />
+                      {volunteer.avg_rating > 0
                         ? `${volunteer.avg_rating}/5`
                         : "Not Rated"}
                     </span>
                   </td>
-                </motion.tr>
+                </tr>
               ))}
             </tbody>
           </table>

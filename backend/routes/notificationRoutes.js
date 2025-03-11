@@ -9,7 +9,7 @@ import {
 const router = express.Router();
 
 router.post("/", sendNotification);
-router.get("/n:user_id", getUserNotifications);
+router.get("/:user_id", getUserNotifications);
 router.put("/:id", markNotificationAsRead);
 
 export default router;

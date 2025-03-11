@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { MoreVertical, X, Filter, ListChecks } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getAllTasks, updateTask, createTask, deleteTask } from "../../api"; // Import API functions
+import { getUserAssignments, updateTask } from "../../api"; // Updated import
 
 function TaskManagement() {
   const [tasks, setTasks] = useState([]);
@@ -11,37 +11,70 @@ function TaskManagement() {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [newTaskNote, setNewTaskNote] = useState("");
+  const [userId, setUserId] = useState(null);
 
-  // Fetch tasks on component mount
+  // Fetch user ID from localStorage or session on component mount
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchUserId = () => {
+      try {
+        // Try to get userId from localStorage
+        const storedUserId = localStorage.getItem("userId");
+
+        // If userId exists in localStorage, use it
+        if (storedUserId) {
+          setUserId(storedUserId);
+          return;
+        }
+
+        // Fallback - for development you can set a default userId
+        // In production, you might want to redirect to login
+        setUserId("1");
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+        setUserId("1"); // Fallback
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
+  // Fetch tasks assigned to current user when userId is available
+  useEffect(() => {
+    if (!userId) return; // Don't fetch if userId is not available yet
+
+    const fetchUserTasks = async () => {
       try {
         setLoading(true);
-        const taskData = await getAllTasks();
+        const taskData = await getUserAssignments(userId);
         // Transform backend data to match frontend structure
-        const transformedTasks = taskData.map(task => ({
+        const transformedTasks = taskData.map((task) => ({
           id: task.task_id,
+          assignmentId: task.assignment_id,
           name: task.task_name,
-          description: task.description,
-          status: task.status || "Not Started", // Default value if status is null
-          priority: determinePriority(task.required_skills), // Map required_skills to priority
-          dueDate: formatDate(task.created_at), // Use created_at as dueDate if needed
-          assignedTo: "Unassigned", // Default value (will be updated in future)
+          description: task.description || "No description provided",
+          status: task.task_status || "Pending",
+          priority: determinePriority(task.required_skills),
+          dueDate: formatDate(task.assigned_at),
+          assignedTo: "You",
           eventId: task.event_id,
-          requiredSkills: task.required_skills
+          requiredSkills: task.required_skills || "",
+          notes: task.notes || [],
         }));
         setTasks(transformedTasks);
         setError(null);
       } catch (err) {
-        console.error("Failed to fetch tasks:", err);
-        setError("Failed to load tasks. Please try again later.");
+        console.error("Failed to fetch user tasks:", err);
+        setError(
+          err.message ||
+            "Failed to load your assigned tasks. Please try again later."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
-  }, []);
+    fetchUserTasks();
+  }, [userId]);
 
   // Helper function to determine priority based on required skills
   const determinePriority = (skills) => {
@@ -54,8 +87,8 @@ function TaskManagement() {
 
   // Helper function to format date
   const formatDate = (dateString) => {
-    if (!dateString) return new Date().toISOString().split('T')[0];
-    return new Date(dateString).toISOString().split('T')[0];
+    if (!dateString) return new Date().toISOString().split("T")[0];
+    return new Date(dateString).toISOString().split("T")[0];
   };
 
   const filteredTasks = tasks.filter(
@@ -65,7 +98,7 @@ function TaskManagement() {
   );
 
   const statusColors = {
-    "Not Started": "bg-red-100 text-red-800",
+    Pending: "bg-red-100 text-red-800",
     "In Progress": "bg-yellow-100 text-yellow-800",
     Completed: "bg-green-100 text-green-800",
   };
@@ -83,37 +116,24 @@ function TaskManagement() {
         task_name: updatedTask.name,
         description: updatedTask.description,
         required_skills: updatedTask.requiredSkills,
-        status: updatedTask.status
+        status: updatedTask.status,
       };
-      
+
       // Call the backend API
       await updateTask(updatedTask.id, backendTask);
-      
+
       // Update local state
       setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        prevTasks.map((task) =>
+          task.id === updatedTask.id ? updatedTask : task
+        )
       );
-      
+
       setNewTaskNote("");
       setSelectedTask(null);
     } catch (err) {
       console.error("Failed to update task:", err);
       setError("Failed to update task. Please try again.");
-    }
-  };
-
-  const handleDeleteTask = async (id) => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      try {
-        await deleteTask(id);
-        setTasks(tasks.filter(task => task.id !== id));
-        if (selectedTask && selectedTask.id === id) {
-          setSelectedTask(null);
-        }
-      } catch (err) {
-        console.error("Failed to delete task:", err);
-        setError("Failed to delete task. Please try again.");
-      }
     }
   };
 
@@ -124,10 +144,10 @@ function TaskManagement() {
         <header className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-4xl font-extrabold text-white mb-2">
-              Task Management
+              My Assigned Tasks
             </h1>
             <p className="text-indigo-200">
-              Manage your team&apos;s tasks efficiently
+              View and manage tasks assigned to you
             </p>
           </div>
         </header>
@@ -146,7 +166,7 @@ function TaskManagement() {
             {/* Filter Section */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex space-x-4">
-                {["All", "Not Started", "In Progress", "Completed"].map(
+                {["All", "Pending", "In Progress", "Completed"].map(
                   (status) => (
                     <button
                       key={status}
@@ -179,11 +199,16 @@ function TaskManagement() {
             {/* Task List */}
             {loading ? (
               <div className="p-8 text-center">
-                <p className="text-indigo-200">Loading tasks...</p>
+                <p className="text-indigo-200">
+                  Loading your assigned tasks...
+                </p>
               </div>
             ) : filteredTasks.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-indigo-200">No tasks found. Try adjusting your filters.</p>
+                <p className="text-indigo-200">
+                  No assigned tasks found. Try adjusting your filters or check
+                  back later.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -198,7 +223,9 @@ function TaskManagement() {
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="font-semibold text-white">{task.name}</h3>
+                        <h3 className="font-semibold text-white">
+                          {task.name}
+                        </h3>
                         <p className="text-sm text-indigo-200 truncate">
                           {task.description}
                         </p>
@@ -211,15 +238,7 @@ function TaskManagement() {
                         >
                           {task.status}
                         </span>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteTask(task.id);
-                          }}
-                          className="text-white/50 hover:text-red-400"
-                        >
-                          <X size={18} />
-                        </button>
+                        <MoreVertical />
                       </div>
                     </div>
                   </motion.div>
@@ -232,11 +251,11 @@ function TaskManagement() {
           <div className="space-y-6">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                <ListChecks className="mr-2" /> Task Overview
+                <ListChecks className="mr-2" /> Your Task Overview
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-600/20 p-4 rounded-xl text-center">
-                  <h4 className="text-sm text-blue-200">Total Tasks</h4>
+                  <h4 className="text-sm text-blue-200">Assigned Tasks</h4>
                   <p className="text-4xl font-bold text-white">
                     {tasks.length}
                   </p>
@@ -254,9 +273,9 @@ function TaskManagement() {
                   </p>
                 </div>
                 <div className="bg-red-600/20 p-4 rounded-xl text-center">
-                  <h4 className="text-sm text-red-200">Not Started</h4>
+                  <h4 className="text-sm text-red-200">Pending</h4>
                   <p className="text-4xl font-bold text-white">
-                    {tasks.filter((t) => t.status === "Not Started").length}
+                    {tasks.filter((t) => t.status === "Pending").length}
                   </p>
                 </div>
               </div>
@@ -298,6 +317,9 @@ function TaskManagement() {
                     {selectedTask.name}
                   </h3>
                   <p className="text-gray-600">{selectedTask.description}</p>
+                  <div className="mt-3 text-sm text-gray-500">
+                    Assignment ID: {selectedTask.assignmentId}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
@@ -334,7 +356,7 @@ function TaskManagement() {
                         })
                       }
                     >
-                      <option>Not Started</option>
+                      <option>Pending</option>
                       <option>In Progress</option>
                       <option>Completed</option>
                     </select>
@@ -355,12 +377,12 @@ function TaskManagement() {
 
                 <div>
                   <label className="block text-sm mb-2 text-gray-700">
-                    Event Update
+                    Task Update
                   </label>
                   <textarea
                     className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500"
                     rows="4"
-                    placeholder="Provide any additional updates or notes about the task."
+                    placeholder="Provide any updates or notes about this task..."
                     value={newTaskNote}
                     onChange={(e) => setNewTaskNote(e.target.value)}
                   />

@@ -76,7 +76,7 @@ function App() {
     "/volunteerlogviewer",
     "/sendnotification",
     "/adminvolunteerlogviewer",
-    "/Createadmin"
+    "/createadmin"
   ].includes(location.pathname.toLowerCase()); // Normalize path for comparison
 
   // Define routes for Volunteer
@@ -104,7 +104,7 @@ function App() {
       <Route path="/admintasks" element={<AdminTasks />} />
       <Route path="/adminvolunteerlogviewer" element={<AdminVolunteerLogViewer />}/>
       <Route path="/sendnotification" element={<SendNotification />} />
-      <Route path="/Createadmin" element={<Createadmin />} /> {/* Add your own admin routes */}
+      <Route path="/createadmin" element={<Createadmin />} /> {/* Add your own admin routes */}
     </>
   );
 

@@ -7,10 +7,12 @@ import {
   getAllTasks as getAllTasksAPI,
   updateTask as updateTaskAPI,
   deleteTask as deleteTaskAPI,
+  getAllEvents, // Import the getAllEvents function
 } from "../../api.jsx";
 
 const AdminTasks = () => {
   const [tasks, setTasks] = useState([]); // State to store tasks
+  const [events, setEvents] = useState([]); // State to store events
   const [openDialog, setOpenDialog] = useState(false); // State to control dialog visibility
   const [currentTask, setCurrentTask] = useState({
     // State for the current task being edited/added
@@ -24,9 +26,10 @@ const AdminTasks = () => {
   });
   const [filter, setFilter] = useState("All"); // State for filtering tasks
 
-  // Fetch tasks from the backend when the component mounts
+  // Fetch tasks and events from the backend when the component mounts
   useEffect(() => {
     fetchTasks();
+    fetchEvents();
   }, []);
 
   // Function to fetch tasks from the backend
@@ -40,6 +43,21 @@ const AdminTasks = () => {
         icon: "error",
         title: "Error",
         text: "Failed to fetch tasks. Please try again later.",
+      });
+    }
+  };
+
+  // Function to fetch events from the backend
+  const fetchEvents = async () => {
+    try {
+      const events = await getAllEvents();
+      setEvents(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch events. Please try again later.",
       });
     }
   };
@@ -69,7 +87,7 @@ const AdminTasks = () => {
       Swal.fire({
         icon: "error",
         title: "Event ID Required",
-        text: "Please enter an event ID",
+        text: "Please select an event",
       });
       return;
     }
@@ -304,7 +322,7 @@ const AdminTasks = () => {
             </div>
 
             <div className="space-y-4">
-              <TextField
+              <Select
                 label="Event ID"
                 value={currentTask.event_id}
                 onChange={(e) =>
@@ -313,7 +331,13 @@ const AdminTasks = () => {
                 fullWidth
                 variant="outlined"
                 className="bg-white/10"
-              />
+              >
+                {events.map((event) => (
+                  <MenuItem key={event.event_id} value={event.event_id}>
+                    {event.event_name} (ID: {event.event_id})
+                  </MenuItem>
+                ))}
+              </Select>
 
               <TextField
                 label="Task Name"

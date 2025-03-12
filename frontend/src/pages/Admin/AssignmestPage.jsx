@@ -26,6 +26,29 @@ const getAllAssignments = async () => {
   }
 };
 
+// Fetch all tasks
+const getAllTasks = async () => {
+  try {
+    const response = await api.get("/tasks");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw error;
+  }
+};
+
+// Fetch all users
+const getAllUsers = async () => {
+  try {
+    const response = await api.get("/users/all"); // Ensure the endpoint is correct
+    console.log("API Response:", response.data); // Log the response
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
 // Create a new assignment
 const createAssignment = async (assignmentData) => {
   try {
@@ -46,7 +69,7 @@ const createAssignment = async (assignmentData) => {
   }
 };
 
-// Update an assignment - FIXED
+// Update an assignment
 const updateAssignment = async (id, assignmentData) => {
   try {
     // Ensure we're working with integers for IDs by forcing conversion
@@ -88,8 +111,10 @@ const deleteAssignmentApi = async (id) => {
 };
 
 const AssignmentsPage = () => {
-  // State for assignments
+  // State for assignments, tasks, and users
   const [assignments, setAssignments] = useState([]);
+  const [tasks, setTasks] = useState([]); // State to store tasks
+  const [users, setUsers] = useState([]); // State to store users
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(1); // Default rating
@@ -102,7 +127,7 @@ const AssignmentsPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch assignments on component mount
+  // Fetch assignments, tasks, and users on component mount
   const fetchAssignments = async () => {
     setIsLoading(true);
     try {
@@ -120,11 +145,41 @@ const AssignmentsPage = () => {
     }
   };
 
+  const fetchTasks = async () => {
+    try {
+      const tasks = await getAllTasks();
+      setTasks(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch tasks. Please try again later.",
+      });
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const users = await getAllUsers();
+      setUsers(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch users. Please try again later.",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchAssignments();
+    fetchTasks();
+    fetchUsers();
   }, []);
 
-  // handle feedback
+  // Handle feedback submission
   const handleFeedbackSubmit = async (assignmentId) => {
     try {
       await createFeedback({
@@ -201,7 +256,7 @@ const AssignmentsPage = () => {
     }
   };
 
-  // Edit an assignment - FIXED
+  // Edit an assignment
   const editAssignment = async () => {
     if (!selectedAssignment || !selectedAssignment.assignment_id) {
       Swal.fire({
@@ -294,7 +349,7 @@ const AssignmentsPage = () => {
     }
   };
 
-  // Handle form input change for edit mode - FIXED
+  // Handle form input change for edit mode
   const handleEditInputChange = (e, field) => {
     const value = e.target.value;
 
@@ -354,32 +409,42 @@ const AssignmentsPage = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Task ID *
             </label>
-            <input
-              type="number"
+            <select
               className="w-full border p-2 rounded-md"
-              placeholder="Task ID"
               value={newAssignment.task_id}
               onChange={(e) =>
                 setNewAssignment({ ...newAssignment, task_id: e.target.value })
               }
               required
-            />
+            >
+              <option value="">Select Task</option>
+              {tasks.map((task) => (
+                <option key={task.task_id} value={task.task_id}>
+                  {task.task_name} (ID: {task.task_id})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               User ID *
             </label>
-            <input
-              type="number"
+            <select
               className="w-full border p-2 rounded-md"
-              placeholder="User ID"
               value={newAssignment.user_id}
               onChange={(e) =>
                 setNewAssignment({ ...newAssignment, user_id: e.target.value })
               }
               required
-            />
+            >
+              <option value="">Select User</option>
+              {users.map((user) => (
+                <option key={user.user_id} value={user.user_id}>
+                  {user.username} (ID: {user.user_id})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -448,7 +513,6 @@ const AssignmentsPage = () => {
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
                 onClick={() => {
-                  // Store reference to original values as numbers
                   setSelectedAssignment({
                     ...assignment,
                     task_id: Number(assignment.task_id),
@@ -496,111 +560,121 @@ const AssignmentsPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Task ID
                   </label>
-                  <input
-                    type="number"
-                    className="w-full border p-2 rounded-md bg-gray-100 cursor-not-allowed"
+                  <select
+                    className="w-full border p-2 rounded-md"
                     value={selectedAssignment.task_id}
-                    disabled
-                    readOnly
-                  />
+                    onChange={(e) => handleEditInputChange(e, "task_id")}
+                  >
+                    <option value="">Select Task</option>
+                    {tasks.map((task) => (
+                      <option key={task.task_id} value={task.task_id}>
+                        {task.task_name} (ID: {task.task_id})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     User ID
                   </label>
-                  <input
-                    type="number"
-                    className="w-full border p-2 rounded-md bg-gray-100 cursor-not-allowed"
-                    value={selectedAssignment.user_id}
-                    disabled
-                    readOnly
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
                   <select
                     className="w-full border p-2 rounded-md"
-                    value={selectedAssignment.status || "Assigned"}
-                    onChange={(e) => handleEditInputChange(e, "status")}
+                    value={selectedAssignment.user_id}
+                    onChange={(e) => handleEditInputChange(e, "user_id")}
                   >
-                    <option value="Assigned">Assigned</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
+                    <option value="">Select User</option>
+                    {users.map((user) => (
+                      <option key={user.user_id} value={user.user_id}>
+                        {user.username} (ID: {user.user_id})
+                      </option>
+                    ))}
                   </select>
-                </div>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assigned Date
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full border p-2 rounded-md"
-                    value={formatDateForInput(selectedAssignment.assigned_at)}
-                    onChange={(e) => handleEditInputChange(e, "assigned_at")}
-                  />
-                </div>
-              </div>
-            ) : (
-              <>
-                <textarea
-                  className="w-full border p-2 rounded-md mb-4"
-                  placeholder="Enter your feedback here..."
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                ></textarea>
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Status
+  </label>
+  <select
+    className="w-full border p-2 rounded-md"
+    value={selectedAssignment.status || "Assigned"}
+    onChange={(e) => handleEditInputChange(e, "status")}
+  >
+    <option value="Assigned">Assigned</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Completed">Completed</option>
+  </select>
+</div>
 
-                <select
-                  className="w-full border p-2 rounded-md mb-4"
-                  value={rating}
-                  onChange={(e) => setRating(e.target.value)}
-                >
-                  <option value="1">⭐ 1</option>
-                  <option value="2">⭐⭐ 2</option>
-                  <option value="3">⭐⭐⭐ 3</option>
-                  <option value="4">⭐⭐⭐⭐ 4</option>
-                  <option value="5">⭐⭐⭐⭐⭐ 5</option>
-                </select>
-              </>
-            )}
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-all"
-                onClick={() => {
-                  setSelectedAssignment(null);
-                  setIsEditing(false);
-                }}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
-                onClick={() =>
-                  isEditing
-                    ? editAssignment()
-                    : handleFeedbackSubmit(selectedAssignment.assignment_id)
-                }
-                disabled={isLoading}
-              >
-                {isLoading
-                  ? isEditing
-                    ? "Saving..."
-                    : "Submitting..."
-                  : isEditing
-                  ? "Save Changes"
-                  : "Submit"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Assigned Date
+  </label>
+  <input
+    type="date"
+    className="w-full border p-2 rounded-md"
+    value={formatDateForInput(selectedAssignment.assigned_at)}
+    onChange={(e) => handleEditInputChange(e, "assigned_at")}
+  />
+</div>
+</div>
+) : (
+<>
+<textarea
+  className="w-full border p-2 rounded-md mb-4"
+  placeholder="Enter your feedback here..."
+  value={feedback}
+  onChange={(e) => setFeedback(e.target.value)}
+></textarea>
+
+<select
+  className="w-full border p-2 rounded-md mb-4"
+  value={rating}
+  onChange={(e) => setRating(e.target.value)}
+>
+  <option value="1">⭐ 1</option>
+  <option value="2">⭐⭐ 2</option>
+  <option value="3">⭐⭐⭐ 3</option>
+  <option value="4">⭐⭐⭐⭐ 4</option>
+  <option value="5">⭐⭐⭐⭐⭐ 5</option>
+</select>
+</>
+)}
+<div className="flex justify-end gap-4">
+<button
+className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-all"
+onClick={() => {
+  setSelectedAssignment(null);
+  setIsEditing(false);
+}}
+disabled={isLoading}
+>
+Cancel
+</button>
+<button
+className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
+onClick={() =>
+  isEditing
+    ? editAssignment()
+    : handleFeedbackSubmit(selectedAssignment.assignment_id)
+}
+disabled={isLoading}
+>
+{isLoading
+  ? isEditing
+    ? "Saving..."
+    : "Submitting..."
+  : isEditing
+  ? "Save Changes"
+  : "Submit"}
+</button>
+</div>
+</div>
+</div>
+)}
+</div>
+);
 };
 
 export default AssignmentsPage;

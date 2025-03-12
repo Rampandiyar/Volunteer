@@ -24,6 +24,7 @@ import VolunteerLogViewer from "./pages/Admin/VolunteerLogViewer.jsx";
 import SendNotification from "./pages/Admin/SendNotification.jsx";
 import AdminDashboard from "./pages/Admin/DashboardAdmin.jsx";
 import AdminVolunteerLogViewer from "./pages/Admin/Adminlogviewer.jsx";
+import Createadmin from "./pages/Admin/Createadmin.jsx";
 
 function App() {
   const location = useLocation();
@@ -75,6 +76,7 @@ function App() {
     "/volunteerlogviewer",
     "/sendnotification",
     "/adminvolunteerlogviewer",
+    "/Createadmin"
   ].includes(location.pathname.toLowerCase()); // Normalize path for comparison
 
   // Define routes for Volunteer
@@ -100,11 +102,9 @@ function App() {
       <Route path="/events" element={<EventS />} />
       <Route path="/assignmentspage" element={<AssignmentsPage />} />
       <Route path="/admintasks" element={<AdminTasks />} />
-      <Route
-        path="/adminvolunteerlogviewer"
-        element={<AdminVolunteerLogViewer />}
-      />
+      <Route path="/adminvolunteerlogviewer" element={<AdminVolunteerLogViewer />}/>
       <Route path="/sendnotification" element={<SendNotification />} />
+      <Route path="/Createadmin" element={<Createadmin />} /> {/* Add your own admin routes */}
     </>
   );
 

@@ -29,6 +29,7 @@ function Sidebar() {
       icon: FileText,
     },
     { path: "/sendnotification", name: "Send Notification", icon: Send },
+    {path:"/Createadmin", name: "Create Admin", icon: User}, // or any other appropriate icon
   ];
 
   const volunteerRoutes = [

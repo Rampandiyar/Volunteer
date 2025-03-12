@@ -108,14 +108,16 @@ export const getTaskStatistics = async (req, res) => {
 
     // Get total hours logged
     const hoursQuery = await pool.query(
-      `SELECT SUM(hours_logged) FROM ActivityLogs WHERE user_id = $1`,
+      `SELECT SUM(EXTRACT(EPOCH FROM (checkout_time - checkin_time)) / 3600) AS total_hours_logged 
+   FROM VolunteerCheckIns 
+   WHERE checkout_time IS NOT NULL AND user_id = $1;`,
       [userId]
     );
 
     const stats = {
       totalTasks: parseInt(totalTasksQuery.rows[0].count),
       completedTasks: parseInt(completedTasksQuery.rows[0].count),
-      totalHoursLogged: parseFloat(hoursQuery.rows[0].sum || 0),
+      totalHoursLogged: parseInt(hoursQuery.rows[0]?.total_hours_logged || 0),
     };
 
     res.json(stats);

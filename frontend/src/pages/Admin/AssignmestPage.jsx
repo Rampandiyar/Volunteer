@@ -11,6 +11,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
+    "Content-Type": "application/json",
   },
 });
 
@@ -28,7 +29,16 @@ const getAllAssignments = async () => {
 // Create a new assignment
 const createAssignment = async (assignmentData) => {
   try {
-    const response = await api.post("/assignments", assignmentData);
+    // Explicitly format the data for sending to API
+    const formattedData = {
+      task_id: parseInt(assignmentData.task_id, 10),
+      user_id: parseInt(assignmentData.user_id, 10),
+      status: assignmentData.status,
+      assigned_at: assignmentData.assigned_at,
+    };
+
+    console.log("Creating assignment with data:", formattedData);
+    const response = await api.post("/assignments", formattedData);
     return response.data;
   } catch (error) {
     console.error("Error creating assignment:", error);
@@ -36,13 +46,32 @@ const createAssignment = async (assignmentData) => {
   }
 };
 
-// Update an assignment
+// Update an assignment - FIXED
 const updateAssignment = async (id, assignmentData) => {
   try {
-    const response = await api.put(`/assignments/${id}`, assignmentData);
+    // Ensure we're working with integers for IDs by forcing conversion
+    const formattedData = {
+      task_id: Number(assignmentData.task_id),
+      user_id: Number(assignmentData.user_id),
+      status: assignmentData.status || "Assigned",
+      assigned_at: assignmentData.assigned_at,
+    };
+
+    console.log("Updating assignment with ID:", id);
+    console.log("Raw assignment data:", assignmentData);
+    console.log("Formatted data for API:", formattedData);
+
+    // Make sure to send the proper format to the API
+    const response = await api.put(`/assignments/${id}`, formattedData);
+
+    console.log("Update response from server:", response);
     return response.data;
   } catch (error) {
-    console.error("Error updating assignment:", error);
+    console.error("Complete error details:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
     throw error;
   }
 };
@@ -71,31 +100,37 @@ const AssignmentsPage = () => {
     status: "Pending",
     assigned_at: new Date().toISOString().split("T")[0],
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch assignments on component mount
+  const fetchAssignments = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAllAssignments();
+      setAssignments(data);
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch assignments.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const data = await getAllAssignments();
-        setAssignments(data);
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: "Failed to fetch assignments.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-      }
-    };
     fetchAssignments();
   }, []);
+
   // handle feedback
   const handleFeedbackSubmit = async (assignmentId) => {
     try {
       await createFeedback({
         assignment_id: assignmentId,
         user_id: 1, // Replace with logged-in user ID
-        rating,
+        rating: parseInt(rating, 10),
         comment: feedback,
       });
 
@@ -121,15 +156,31 @@ const AssignmentsPage = () => {
 
   // Add a new assignment
   const addAssignment = async () => {
+    if (!newAssignment.task_id || !newAssignment.user_id) {
+      Swal.fire({
+        title: "Validation Error",
+        text: "Task ID and User ID are required fields.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const response = await createAssignment(newAssignment);
-      setAssignments([...assignments, response]);
+      console.log("Server response from create:", response);
+
+      // Force a fresh fetch of assignments to ensure sync with server
+      await fetchAssignments();
+
       setNewAssignment({
         task_id: "",
         user_id: "",
-        status: "Pending",
+        status: "Assigned",
         assigned_at: new Date().toISOString().split("T")[0],
       });
+
       Swal.fire({
         title: "Assignment Added",
         text: "New assignment has been added successfully.",
@@ -139,28 +190,60 @@ const AssignmentsPage = () => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Failed to add assignment.",
+        text:
+          "Failed to add assignment: " +
+          (error.response?.data?.message || error.message),
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Edit an assignment
+  // Edit an assignment - FIXED
   const editAssignment = async () => {
+    if (!selectedAssignment || !selectedAssignment.assignment_id) {
+      Swal.fire({
+        title: "Error",
+        text: "No assignment selected for editing.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      const response = await updateAssignment(
-        selectedAssignment.assignment_id,
+      console.log(
+        "Starting update process for assignment:",
         selectedAssignment
       );
-      const updatedAssignments = assignments.map((assign) =>
-        assign.assignment_id === selectedAssignment.assignment_id
-          ? response
-          : assign
+
+      // Ensure data is formatted correctly for the API
+      const updateData = {
+        task_id: Number(selectedAssignment.task_id),
+        user_id: Number(selectedAssignment.user_id),
+        status: selectedAssignment.status || "Assigned",
+        assigned_at: formatDateForInput(selectedAssignment.assigned_at),
+      };
+
+      console.log("Sending update with data:", updateData);
+
+      // Call the update function
+      const result = await updateAssignment(
+        selectedAssignment.assignment_id,
+        updateData
       );
-      setAssignments(updatedAssignments);
+
+      console.log("Update result:", result);
+
+      // Force a fresh fetch of assignments to ensure sync with server
+      await fetchAssignments();
+
       setSelectedAssignment(null);
       setIsEditing(false);
+
       Swal.fire({
         title: "Assignment Updated",
         text: "The assignment has been updated successfully.",
@@ -168,23 +251,29 @@ const AssignmentsPage = () => {
         confirmButtonText: "OK",
       });
     } catch (error) {
+      console.error("Complete error object:", error);
       Swal.fire({
         title: "Error",
-        text: "Failed to update assignment.",
+        text:
+          "Failed to update assignment: " +
+          (error.response?.data?.message || error.message),
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Delete an assignment
   const deleteAssignment = async (assignmentId) => {
+    setIsLoading(true);
     try {
       await deleteAssignmentApi(assignmentId);
-      const updatedAssignments = assignments.filter(
-        (assign) => assign.assignment_id !== assignmentId
-      );
-      setAssignments(updatedAssignments);
+
+      // Force a fresh fetch of assignments to ensure sync with server
+      await fetchAssignments();
+
       Swal.fire({
         title: "Assignment Deleted",
         text: "The assignment has been deleted successfully.",
@@ -194,10 +283,58 @@ const AssignmentsPage = () => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Failed to delete assignment.",
+        text:
+          "Failed to delete assignment: " +
+          (error.response?.data?.message || error.message),
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle form input change for edit mode - FIXED
+  const handleEditInputChange = (e, field) => {
+    const value = e.target.value;
+
+    console.log(`Updating ${field} to:`, value, typeof value);
+
+    setSelectedAssignment((prev) => {
+      if (!prev) return null;
+
+      // Create a new object with the updated field
+      const updated = {
+        ...prev,
+        [field]: value,
+      };
+
+      console.log("Updated assignment object:", updated);
+      return updated;
+    });
+  };
+
+  // Format date for the form
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+
+    // If it's already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+
+    // If it contains a T (ISO format), split and take the date part
+    if (dateString.includes("T")) {
+      return dateString.split("T")[0];
+    }
+
+    // Otherwise try to create a date and format it
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split("T")[0];
+    } catch (e) {
+      console.error("Invalid date format:", dateString);
+      return "";
     }
   };
 
@@ -213,51 +350,78 @@ const AssignmentsPage = () => {
           Add New Assignment
         </h2>
         <div className="space-y-4">
-          <input
-            type="number"
-            className="w-full border p-2 rounded-md"
-            placeholder="Task ID"
-            value={newAssignment.task_id}
-            onChange={(e) =>
-              setNewAssignment({ ...newAssignment, task_id: e.target.value })
-            }
-          />
-          <input
-            type="number"
-            className="w-full border p-2 rounded-md"
-            placeholder="User ID"
-            value={newAssignment.user_id}
-            onChange={(e) =>
-              setNewAssignment({ ...newAssignment, user_id: e.target.value })
-            }
-          />
-          <select
-            className="w-full border p-2 rounded-md"
-            value={newAssignment.status}
-            onChange={(e) =>
-              setNewAssignment({ ...newAssignment, status: e.target.value })
-            }
-          >
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <input
-            type="date"
-            className="w-full border p-2 rounded-md"
-            value={newAssignment.assigned_at}
-            onChange={(e) =>
-              setNewAssignment({
-                ...newAssignment,
-                assigned_at: e.target.value,
-              })
-            }
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Task ID *
+            </label>
+            <input
+              type="number"
+              className="w-full border p-2 rounded-md"
+              placeholder="Task ID"
+              value={newAssignment.task_id}
+              onChange={(e) =>
+                setNewAssignment({ ...newAssignment, task_id: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              User ID *
+            </label>
+            <input
+              type="number"
+              className="w-full border p-2 rounded-md"
+              placeholder="User ID"
+              value={newAssignment.user_id}
+              onChange={(e) =>
+                setNewAssignment({ ...newAssignment, user_id: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              className="w-full border p-2 rounded-md"
+              value={newAssignment.status}
+              onChange={(e) =>
+                setNewAssignment({ ...newAssignment, status: e.target.value })
+              }
+            >
+              <option value="Assigned">Assigned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assigned Date
+            </label>
+            <input
+              type="date"
+              className="w-full border p-2 rounded-md"
+              value={newAssignment.assigned_at}
+              onChange={(e) =>
+                setNewAssignment({
+                  ...newAssignment,
+                  assigned_at: e.target.value,
+                })
+              }
+            />
+          </div>
+
           <button
             className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
             onClick={addAssignment}
+            disabled={isLoading}
           >
-            Add Assignment
+            {isLoading ? "Adding..." : "Add Assignment"}
           </button>
         </div>
       </div>
@@ -284,21 +448,32 @@ const AssignmentsPage = () => {
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
                 onClick={() => {
-                  setSelectedAssignment(assignment);
+                  // Store reference to original values as numbers
+                  setSelectedAssignment({
+                    ...assignment,
+                    task_id: Number(assignment.task_id),
+                    user_id: Number(assignment.user_id),
+                  });
                   setIsEditing(true);
                 }}
+                disabled={isLoading}
               >
                 Edit
               </button>
               <button
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-300"
                 onClick={() => deleteAssignment(assignment.assignment_id)}
+                disabled={isLoading}
               >
                 Delete
               </button>
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300"
-                onClick={() => setSelectedAssignment(assignment)}
+                onClick={() => {
+                  setSelectedAssignment({ ...assignment });
+                  setIsEditing(false);
+                }}
+                disabled={isLoading}
               >
                 Submit Feedback
               </button>
@@ -309,7 +484,7 @@ const AssignmentsPage = () => {
 
       {/* Edit/Feedback Modal */}
       {selectedAssignment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h2 className="text-xl font-bold mb-4 text-indigo-600">
               {isEditing ? "Edit Assignment" : "Submit Feedback"} for Task ID:{" "}
@@ -317,55 +492,58 @@ const AssignmentsPage = () => {
             </h2>
             {isEditing ? (
               <div className="space-y-4">
-                <input
-                  type="number"
-                  className="w-full border p-2 rounded-md"
-                  placeholder="Task ID"
-                  value={selectedAssignment.task_id}
-                  onChange={(e) =>
-                    setSelectedAssignment({
-                      ...selectedAssignment,
-                      task_id: e.target.value,
-                    })
-                  }
-                />
-                <input
-                  type="number"
-                  className="w-full border p-2 rounded-md"
-                  placeholder="User ID"
-                  value={selectedAssignment.user_id}
-                  onChange={(e) =>
-                    setSelectedAssignment({
-                      ...selectedAssignment,
-                      user_id: e.target.value,
-                    })
-                  }
-                />
-                <select
-                  className="w-full border p-2 rounded-md"
-                  value={selectedAssignment.status}
-                  onChange={(e) =>
-                    setSelectedAssignment({
-                      ...selectedAssignment,
-                      status: e.target.value,
-                    })
-                  }
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <input
-                  type="date"
-                  className="w-full border p-2 rounded-md"
-                  value={selectedAssignment.assigned_at}
-                  onChange={(e) =>
-                    setSelectedAssignment({
-                      ...selectedAssignment,
-                      assigned_at: e.target.value,
-                    })
-                  }
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Task ID
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full border p-2 rounded-md bg-gray-100 cursor-not-allowed"
+                    value={selectedAssignment.task_id}
+                    disabled
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    User ID
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full border p-2 rounded-md bg-gray-100 cursor-not-allowed"
+                    value={selectedAssignment.user_id}
+                    disabled
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    className="w-full border p-2 rounded-md"
+                    value={selectedAssignment.status || "Assigned"}
+                    onChange={(e) => handleEditInputChange(e, "status")}
+                  >
+                    <option value="Assigned">Assigned</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Assigned Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border p-2 rounded-md"
+                    value={formatDateForInput(selectedAssignment.assigned_at)}
+                    onChange={(e) => handleEditInputChange(e, "assigned_at")}
+                  />
+                </div>
               </div>
             ) : (
               <>
@@ -396,6 +574,7 @@ const AssignmentsPage = () => {
                   setSelectedAssignment(null);
                   setIsEditing(false);
                 }}
+                disabled={isLoading}
               >
                 Cancel
               </button>
@@ -406,8 +585,15 @@ const AssignmentsPage = () => {
                     ? editAssignment()
                     : handleFeedbackSubmit(selectedAssignment.assignment_id)
                 }
+                disabled={isLoading}
               >
-                {isEditing ? "Save Changes" : "Submit"}
+                {isLoading
+                  ? isEditing
+                    ? "Saving..."
+                    : "Submitting..."
+                  : isEditing
+                  ? "Save Changes"
+                  : "Submit"}
               </button>
             </div>
           </div>

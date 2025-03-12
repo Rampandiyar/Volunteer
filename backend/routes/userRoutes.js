@@ -15,7 +15,7 @@ import {
 const router = express.Router();
 
 // Public routes
-router.post("/add", createUser); // Register a new user
+router.post("/register", createUser); // Register a new user
 router.post("/login", loginUser); // User login
 
 // Protected routes (Require authentication)

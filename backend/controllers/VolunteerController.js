@@ -6,6 +6,7 @@ export const getVolunteers = async (req, res) => {
       SELECT 
         u.user_id, 
         u.username,
+        u.email,
         u.year,
         u.department, 
         u.skills, 

@@ -38,16 +38,19 @@ function AdminVolunteerLogViewer() {
 
   // Filter logs based on input fields
   const filteredLogs = logs.filter((log) => {
+    // Convert date to YYYY-MM-DD format for comparison
+    const logDate = new Date(log.checkin_time).toISOString().split("T")[0];
+    const filterDate = filter.date
+      ? new Date(filter.date).toISOString().split("T")[0]
+      : null;
+
     return (
-      (filter.date
-        ? new Date(log.checkin_time).toLocaleDateString().includes(filter.date)
-        : true) && // Fixed: format date consistently for filtering
-      (filter.volunteer
-        ? log.user_id
-            .toString()
-            .toLowerCase()
-            .includes(filter.volunteer.toLowerCase())
-        : true) // Fixed: explicitly convert to lowercase
+      (!filter.date || logDate === filterDate) && // Date comparison
+      (!filter.volunteer ||
+        log.user_id
+          ?.toString()
+          .toLowerCase()
+          .includes(filter.volunteer.toLowerCase())) // User ID filter
     );
   });
 
@@ -57,7 +60,7 @@ function AdminVolunteerLogViewer() {
 
     const hours =
       (new Date(checkoutTime) - new Date(checkinTime)) / (1000 * 60 * 60);
-    return hours.toFixed(2); // Fixed: format hours with 2 decimal places
+    return hours.toFixed(2);
   };
 
   return (

@@ -19,7 +19,7 @@ const AdminTasks = () => {
     task_name: "",
     description: "",
     required_skills: "Low",
-    status: "Assigned",
+    status: "In Progress",
     dueDate: "",
   });
   const [filter, setFilter] = useState("All"); // State for filtering tasks
@@ -100,7 +100,7 @@ const AdminTasks = () => {
         task_name: "",
         description: "",
         required_skills: "Low",
-        status: "Assigned",
+        status: "In Progress",
         dueDate: "",
       });
 
@@ -188,7 +188,7 @@ const AdminTasks = () => {
                 task_name: "",
                 description: "",
                 required_skills: "Low",
-                status: "Assigned",
+                status: "In Progress",
                 dueDate: "",
               });
               setOpenDialog(true);
@@ -372,7 +372,7 @@ const AdminTasks = () => {
                   fullWidth
                   variant="outlined"
                 >
-                  <MenuItem value="Assigned">Assigned</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
                   <MenuItem value="In Progress">In Progress</MenuItem>
                   <MenuItem value="Completed">Completed</MenuItem>
                 </Select>

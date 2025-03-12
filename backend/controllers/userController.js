@@ -7,28 +7,28 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     return res
       .status(400)
-      .json({ error: "Username and password are required" });
+      .json({ error: "email and password are required" });
   }
 
   try {
-    const result = await pool.query("SELECT * FROM Users WHERE username = $1", [
-      username,
+    const result = await pool.query("SELECT * FROM Users WHERE email = $1", [
+      email,
     ]);
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const user = result.rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const token = jwt.sign(

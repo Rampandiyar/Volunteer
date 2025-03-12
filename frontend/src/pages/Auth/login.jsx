@@ -16,17 +16,19 @@ function Login() {
   }, []);
 
   const formik = useFormik({
-    initialValues: { username: "", password: "" }, // Use username instead of email
+    initialValues: { email: "", password: "" }, // Use email instead of username
     validationSchema: Yup.object({
-      username: Yup.string().required("Required"), // Validate username
+      email: Yup.string()
+        .email("Invalid email address") // Validate email format
+        .required("Required"), // Email is required
       password: Yup.string().required("Required"),
     }),
     onSubmit: async (values) => {
       setError(null); // Reset error state
       try {
-        // Call the loginUser API function with username
+        // Call the loginUser API function with email
         const response = await loginUser({
-          username: values.username,
+          email: values.email, // Use email instead of username
           password: values.password,
         });
 
@@ -43,7 +45,7 @@ function Login() {
         }
       } catch (err) {
         console.error("Login error:", err);
-        setError("Invalid username or password"); // Set error message
+        setError("Invalid email or password"); // Set error message
       }
     },
   });
@@ -67,24 +69,24 @@ function Login() {
         <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div>
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-gray-700 font-medium mb-2"
             >
-              Username
+              Email
             </label>
             <input
-              type="text"
-              name="username"
-              id="username"
-              placeholder="Enter your username"
-              value={formik.values.username}
+              type="email" // Use type="email" for email input
+              name="email"
+              id="email"
+              placeholder="Enter your email"
+              value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition duration-300 ease-in-out"
             />
-            {formik.touched.username && formik.errors.username && (
+            {formik.touched.email && formik.errors.email && (
               <p className="text-red-500 text-sm mt-1 animate-pulse">
-                {formik.errors.username}
+                {formik.errors.email}
               </p>
             )}
           </div>

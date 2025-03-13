@@ -16,7 +16,10 @@ const getAuthHeaders = () => {
 // User API
 export const createUser = async (userData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/users/add`, userData);
+    const response = await axios.post(
+      `${API_BASE_URL}/users/register`,
+      userData
+    );
     return response.data;
   } catch (error) {
     console.error("Error creating user:", error);

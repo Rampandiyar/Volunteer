@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { createUser } from "../../api"; // Import the API function
-import { useNavigate } from "react-router-dom";
 
 function Createadmin() {
-  const navigate = useNavigate();
-
   // State for form data
   const [formData, setFormData] = useState({
     username: "",
@@ -137,7 +134,6 @@ function Createadmin() {
         const response = await createUser(formData); // Call the API
         setSuccessMessage("User created successfully!");
         setErrorMessage("");
-        navigate("/login");
         console.log("User created successfully:", response);
         // Optionally, redirect to login page or clear the form
         setFormData({

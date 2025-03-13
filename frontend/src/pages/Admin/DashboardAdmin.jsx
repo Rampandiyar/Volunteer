@@ -16,7 +16,6 @@ import * as XLSX from "xlsx";
 import {
   getDashboardStats,
   getTaskCompletionStats,
-  getTopVolunteersByHours,
   getTopVolunteerOfMonth,
   getActivityLogs,
 } from "../../api";
@@ -90,7 +89,6 @@ function AdminDashboard() {
     doc.text(`Total Volunteers: ${stats.totalVolunteers}`, 20, 20);
     doc.text(`Total Tasks: ${stats.totalTasks}`, 20, 30);
     doc.text(`Upcoming Events: ${stats.upcomingEvents}`, 20, 40);
-    doc.text(`Top Volunteer: ${topVolunteer.name}`, 20, 50);
     doc.text(`Total Volunteer Hours: ${stats.volunteerHours}`, 20, 60);
     doc.save("Volunteer_Report.pdf");
   };

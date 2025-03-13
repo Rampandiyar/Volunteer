@@ -374,19 +374,6 @@ function TaskManagement() {
                     disabled
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm mb-2 text-gray-700">
-                    Task Update
-                  </label>
-                  <textarea
-                    className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500"
-                    rows="4"
-                    placeholder="Provide any updates or notes about this task..."
-                    value={newTaskNote}
-                    onChange={(e) => setNewTaskNote(e.target.value)}
-                  />
-                </div>
               </div>
 
               <button

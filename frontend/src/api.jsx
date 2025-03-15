@@ -53,7 +53,7 @@ export const logoutUser = async (userId) => {
 
 export const getAllUsers = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users`);
+    const response = await axios.get(`${API_BASE_URL}/users/all`);
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);

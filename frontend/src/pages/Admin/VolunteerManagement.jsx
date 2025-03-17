@@ -7,7 +7,7 @@ import {
   Mail,
   User,
 } from "lucide-react";
-import { getVolunteers } from "../../api";
+import { getVolunteerss } from "../../api";
 
 const VolunteerManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +22,7 @@ const VolunteerManagement = () => {
   useEffect(() => {
     const fetchVolunteers = async () => {
       try {
-        const data = await getVolunteers();
+        const data = await getVolunteerss();
         console.log("Fetched volunteers:", data); // Debugging log
         setVolunteers(data);
       } catch (error) {

@@ -23,7 +23,7 @@ function SendNotification() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get("/users/all"); // Fetch users from the backend
+        const response = await api.get("/users/volunter"); // Fetch users from the backend
         setUsers(response.data); // Store the fetched users
       } catch (err) {
         console.error("Error fetching users:", err);

@@ -40,7 +40,7 @@ const getAllTasks = async () => {
 // Fetch all users
 const getAllUsers = async () => {
   try {
-    const response = await api.get("/users/all"); // Ensure the endpoint is correct
+    const response = await api.get("/users/volunter"); // Ensure the endpoint is correct
     console.log("API Response:", response.data); // Log the response
     return response.data;
   } catch (error) {

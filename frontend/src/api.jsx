@@ -64,6 +64,16 @@ export const getAllUsers = async () => {
   }
 };
 
+export const getVolunteerss = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/volunter`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
 export const getAllcheckins = async (userId) => {
   try {
     const response = await axios.get(

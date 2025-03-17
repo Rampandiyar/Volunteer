@@ -10,6 +10,7 @@ import {
   getVolunteerHours,
   getUserById,
   getVolunteersCheckIns,
+  getVolunteers,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.get("/get/:id", getUserById);
 router.get("/checkins", getVolunteerCheckIns); // Get all check-ins
 router.get("/volunteers/checkins", getVolunteersCheckIns); // Get all check-ins
 router.get("/hours", getVolunteerHours); // Get volunteer hours
+router.get("/volunter",getVolunteers)
 
 export default router;

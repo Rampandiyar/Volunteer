@@ -283,3 +283,25 @@ export const getVolunteerHours = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+// Get Users with Role "Volunteer"
+export const getVolunteers = async (req, res) => {
+  try {
+    const query = "SELECT * FROM Users WHERE role = $1";
+    const result = await pool.query(query, ["Volunteer"]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No volunteers found" });
+    }
+
+    // Remove sensitive information (e.g., password) before sending the response
+    const volunteers = result.rows.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+
+    res.status(200).json(volunteers);
+  } catch (err) {
+    console.error("Error fetching volunteers:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};

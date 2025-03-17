@@ -560,121 +560,109 @@ const AssignmentsPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Task ID
                   </label>
-                  <select
-                    className="w-full border p-2 rounded-md"
-                    value={selectedAssignment.task_id}
-                    onChange={(e) => handleEditInputChange(e, "task_id")}
-                  >
-                    <option value="">Select Task</option>
-                    {tasks.map((task) => (
-                      <option key={task.task_id} value={task.task_id}>
-                        {task.task_name} (ID: {task.task_id})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="w-full border p-2 rounded-md bg-gray-100 text-gray-700">
+                    {tasks.find(
+                      (task) => task.task_id === selectedAssignment.task_id
+                    )?.task_name || ""}{" "}
+                    (ID: {selectedAssignment.task_id})
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     User ID
                   </label>
+                  <div className="w-full border p-2 rounded-md bg-gray-100 text-gray-700">
+                    {users.find(
+                      (user) => user.user_id === selectedAssignment.user_id
+                    )?.username || ""}{" "}
+                    (ID: {selectedAssignment.user_id})
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
                   <select
                     className="w-full border p-2 rounded-md"
-                    value={selectedAssignment.user_id}
-                    onChange={(e) => handleEditInputChange(e, "user_id")}
+                    value={selectedAssignment.status || "Assigned"}
+                    onChange={(e) => handleEditInputChange(e, "status")}
                   >
-                    <option value="">Select User</option>
-                    {users.map((user) => (
-                      <option key={user.user_id} value={user.user_id}>
-                        {user.username} (ID: {user.user_id})
-                      </option>
-                    ))}
+                    <option value="Assigned">Assigned</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
                   </select>
-                  </div>
+                </div>
 
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Status
-  </label>
-  <select
-    className="w-full border p-2 rounded-md"
-    value={selectedAssignment.status || "Assigned"}
-    onChange={(e) => handleEditInputChange(e, "status")}
-  >
-    <option value="Assigned">Assigned</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Completed">Completed</option>
-  </select>
-</div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Assigned Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border p-2 rounded-md"
+                    value={formatDateForInput(selectedAssignment.assigned_at)}
+                    onChange={(e) => handleEditInputChange(e, "assigned_at")}
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="w-full border p-2 rounded-md mb-4"
+                  placeholder="Enter your feedback here..."
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                ></textarea>
 
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Assigned Date
-  </label>
-  <input
-    type="date"
-    className="w-full border p-2 rounded-md"
-    value={formatDateForInput(selectedAssignment.assigned_at)}
-    onChange={(e) => handleEditInputChange(e, "assigned_at")}
-  />
-</div>
-</div>
-) : (
-<>
-<textarea
-  className="w-full border p-2 rounded-md mb-4"
-  placeholder="Enter your feedback here..."
-  value={feedback}
-  onChange={(e) => setFeedback(e.target.value)}
-></textarea>
-
-<select
-  className="w-full border p-2 rounded-md mb-4"
-  value={rating}
-  onChange={(e) => setRating(e.target.value)}
->
-  <option value="1">⭐ 1</option>
-  <option value="2">⭐⭐ 2</option>
-  <option value="3">⭐⭐⭐ 3</option>
-  <option value="4">⭐⭐⭐⭐ 4</option>
-  <option value="5">⭐⭐⭐⭐⭐ 5</option>
-</select>
-</>
-)}
-<div className="flex justify-end gap-4">
-<button
-className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-all"
-onClick={() => {
-  setSelectedAssignment(null);
-  setIsEditing(false);
-}}
-disabled={isLoading}
->
-Cancel
-</button>
-<button
-className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
-onClick={() =>
-  isEditing
-    ? editAssignment()
-    : handleFeedbackSubmit(selectedAssignment.assignment_id)
-}
-disabled={isLoading}
->
-{isLoading
-  ? isEditing
-    ? "Saving..."
-    : "Submitting..."
-  : isEditing
-  ? "Save Changes"
-  : "Submit"}
-</button>
-</div>
-</div>
-</div>
-)}
-</div>
-);
+                <select
+                  className="w-full border p-2 rounded-md mb-4"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                >
+                  <option value="1">⭐ 1</option>
+                  <option value="2">⭐⭐ 2</option>
+                  <option value="3">⭐⭐⭐ 3</option>
+                  <option value="4">⭐⭐⭐⭐ 4</option>
+                  <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                </select>
+              </>
+            )}
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-all"
+                onClick={() => {
+                  setSelectedAssignment(null);
+                  setIsEditing(false);
+                }}
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all"
+                onClick={() =>
+                  isEditing
+                    ? editAssignment()
+                    : handleFeedbackSubmit(selectedAssignment.assignment_id)
+                }
+                disabled={isLoading}
+              >
+                {isLoading
+                  ? isEditing
+                    ? "Saving..."
+                    : "Submitting..."
+                  : isEditing
+                  ? "Save Changes"
+                  : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AssignmentsPage;
